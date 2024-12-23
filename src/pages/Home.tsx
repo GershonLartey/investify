@@ -54,7 +54,7 @@ const Home = () => {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
+              className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
             >
               <div className="flex items-center gap-4">
                 <div className="text-primary p-2 bg-primary/10 rounded-lg">
