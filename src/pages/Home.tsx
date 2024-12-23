@@ -1,61 +1,91 @@
-import { ArrowRight, TrendingUp, Shield, DollarSign } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Auth } from "@supabase/auth-ui-react";
+import { ThemeSupa } from "@supabase/auth-ui-shared";
+import { supabase } from "@/integrations/supabase/client";
+import { ArrowRight, Shield, TrendingUp, DollarSign } from "lucide-react";
 
 const Home = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN") {
+        navigate("/dashboard");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
   const features = [
     {
       icon: <TrendingUp className="h-6 w-6" />,
       title: "Smart Investments",
-      description: "Access curated investment opportunities with high potential returns",
+      description: "Access curated investment opportunities",
     },
     {
       icon: <Shield className="h-6 w-6" />,
       title: "Secure Platform",
-      description: "Your investments are protected with bank-level security",
+      description: "Bank-level security for your investments",
     },
     {
       icon: <DollarSign className="h-6 w-6" />,
-      title: "Competitive Returns",
-      description: "Earn competitive returns on your investment portfolio",
+      title: "High Returns",
+      description: "Competitive returns on investments",
     },
   ];
 
   return (
-    <div className="space-y-16">
-      {/* Hero Section */}
-      <div className="text-center space-y-8">
-        <h1 className="text-4xl sm:text-6xl font-bold text-gray-900">
-          Invest in Your Future
-        </h1>
-        <p className="max-w-2xl mx-auto text-xl text-gray-600">
-          Start your investment journey today with our secure and profitable investment packages
-        </p>
-        <div className="flex justify-center gap-4">
-          <Link
-            to="/dashboard"
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90"
-          >
-            Get Started
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Link>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <div className="px-4 py-8">
+        {/* Hero Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Invest in Your Future
+          </h1>
+          <p className="text-lg text-gray-600 mb-8">
+            Start your investment journey today with our secure platform
+          </p>
         </div>
-      </div>
 
-      {/* Features Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 gap-6 mb-12">
           {features.map((feature, index) => (
             <div
               key={index}
-              className="relative group bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
             >
-              <div className="text-primary mb-4">{feature.icon}</div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {feature.title}
-              </h3>
-              <p className="text-gray-600">{feature.description}</p>
+              <div className="flex items-center gap-4">
+                <div className="text-primary p-2 bg-primary/10 rounded-lg">
+                  {feature.icon}
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">{feature.title}</h3>
+                  <p className="text-sm text-gray-600">{feature.description}</p>
+                </div>
+              </div>
             </div>
           ))}
+        </div>
+
+        {/* Auth UI */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <Auth
+            supabaseClient={supabase}
+            appearance={{
+              theme: ThemeSupa,
+              variables: {
+                default: {
+                  colors: {
+                    brand: '#1E3A8A',
+                    brandAccent: '#1E40AF',
+                  },
+                },
+              },
+            }}
+            providers={[]}
+          />
         </div>
       </div>
     </div>
