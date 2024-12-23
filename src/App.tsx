@@ -19,8 +19,7 @@ const App = () => (
     <TooltipProvider>
       <BrowserRouter>
         <div className="min-h-screen bg-gray-50">
-          <Navigation />
-          <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          <main className="pb-16 max-w-md mx-auto">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/dashboard" element={<Dashboard />} />
@@ -31,6 +30,7 @@ const App = () => (
               <Route path="/messages" element={<Messages />} />
             </Routes>
           </main>
+          <Navigation />
         </div>
       </BrowserRouter>
       <Toaster />
