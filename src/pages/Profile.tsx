@@ -1,7 +1,28 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 
 const Profile = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="p-4 space-y-6">
       <h1 className="text-2xl font-bold text-gray-900">Profile Settings</h1>
@@ -50,8 +71,15 @@ const Profile = () => {
           />
         </div>
 
-        <div className="pt-4">
+        <div className="pt-4 space-y-4">
           <Button className="w-full">Save Changes</Button>
+          <Button 
+            variant="destructive" 
+            className="w-full"
+            onClick={handleSignOut}
+          >
+            Sign Out
+          </Button>
         </div>
       </Card>
     </div>
