@@ -15,37 +15,13 @@ const Home = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN") {
         navigate("/dashboard");
-      } else if (event === "USER_DELETED") {
+      } else if (event === "SIGNED_OUT") {
         navigate("/");
       }
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
-
-  // Custom error handler for auth
-  const handleAuthError = (error: any) => {
-    console.error("Auth error:", error);
-    if (error.message.includes("Email already registered")) {
-      toast({
-        title: "Error",
-        description: "This email is already in use. Please try logging in instead.",
-        variant: "destructive",
-      });
-    } else if (error.message.includes("Invalid login credentials")) {
-      toast({
-        title: "Error",
-        description: "Invalid credentials. Please check your email and password.",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
 
   const features = [
     {
@@ -111,7 +87,16 @@ const Home = () => {
               },
             }}
             providers={[]}
-            onError={handleAuthError}
+            localization={{
+              variables: {
+                sign_in: {
+                  email_input_placeholder: "Your email address",
+                  password_input_placeholder: "Your password",
+                  email_label: "Email address",
+                  password_label: "Password",
+                },
+              },
+            }}
           />
         </div>
       </div>
