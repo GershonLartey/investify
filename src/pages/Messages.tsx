@@ -14,7 +14,7 @@ const Messages = () => {
   const queryClient = useQueryClient();
 
   // Fetch messages
-  const { data: messages = [] } = useQuery({
+  const { data: messages = [], isError: isMessagesError } = useQuery({
     queryKey: ["messages"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -26,13 +26,16 @@ const Messages = () => {
         .eq('user_id', user.id)
         .order("created_at", { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching messages:", error);
+        throw error;
+      }
       return data;
     },
   });
 
   // Fetch notifications
-  const { data: notifications = [] } = useQuery({
+  const { data: notifications = [], isError: isNotificationsError } = useQuery({
     queryKey: ["notifications"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -44,7 +47,10 @@ const Messages = () => {
         .eq('user_id', user.id)
         .order("created_at", { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching notifications:", error);
+        throw error;
+      }
       return data;
     },
   });
@@ -60,7 +66,9 @@ const Messages = () => {
         .insert({
           content,
           user_id: user.id,
-        });
+        })
+        .select()
+        .single();
       
       if (error) throw error;
       return data;
@@ -73,7 +81,8 @@ const Messages = () => {
         description: "Your message has been sent to support",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Error sending message:", error);
       toast({
         title: "Error",
         description: "Failed to send message",
@@ -87,6 +96,10 @@ const Messages = () => {
     if (!newMessage.trim()) return;
     sendMessageMutation.mutate(newMessage);
   };
+
+  if (isMessagesError || isNotificationsError) {
+    return <div className="p-4 text-red-500">Error loading data. Please try again later.</div>;
+  }
 
   return (
     <div className="space-y-6">
