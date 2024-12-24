@@ -13,6 +13,7 @@ import Withdrawal from "./pages/Withdrawal";
 import Investments from "./pages/Investments";
 import Profile from "./pages/Profile";
 import Messages from "./pages/Messages";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -116,6 +117,14 @@ const App = () => {
                   element={
                     <PrivateRoute>
                       <Messages />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <PrivateRoute>
+                      <Admin />
                     </PrivateRoute>
                   }
                 />
