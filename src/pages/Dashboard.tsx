@@ -7,45 +7,33 @@ import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const { toast } = useToast();
-  const [userId, setUserId] = useState<string | null>(null);
+  const [session, setSession] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          setUserId(session.user.id);
-        }
-      } catch (error) {
-        console.error('Auth initialization error:', error);
-        toast({
-          title: "Authentication Error",
-          description: "Please try logging in again",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    // Initialize auth and handle session changes
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setIsLoading(false);
+    });
 
-    initAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUserId(session?.user?.id || null);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
     });
 
     return () => subscription.unsubscribe();
-  }, [toast]);
+  }, []);
 
   const { data: profile } = useQuery({
-    queryKey: ['profile', userId],
+    queryKey: ['profile', session?.user?.id],
     queryFn: async () => {
-      if (!userId) return null;
+      if (!session?.user?.id) return null;
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('id', session.user.id)
         .maybeSingle();
       
       if (error) {
@@ -54,17 +42,17 @@ const Dashboard = () => {
       }
       return data;
     },
-    enabled: !!userId && !isLoading,
+    enabled: !!session?.user?.id && !isLoading,
   });
 
   const { data: transactions } = useQuery({
-    queryKey: ['transactions', userId],
+    queryKey: ['transactions', session?.user?.id],
     queryFn: async () => {
-      if (!userId) return [];
+      if (!session?.user?.id) return [];
       const { data, error } = await supabase
         .from('transactions')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', session.user.id)
         .order('created_at', { ascending: false })
         .limit(5);
       
@@ -74,18 +62,18 @@ const Dashboard = () => {
       }
       return data || [];
     },
-    enabled: !!userId && !isLoading,
+    enabled: !!session?.user?.id && !isLoading,
     retry: false,
   });
 
   const { data: activeInvestments } = useQuery({
-    queryKey: ['active-investments', userId],
+    queryKey: ['active-investments', session?.user?.id],
     queryFn: async () => {
-      if (!userId) return [];
+      if (!session?.user?.id) return [];
       const { data, error } = await supabase
         .from('investments')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', session.user.id)
         .eq('status', 'active');
       
       if (error) {
@@ -94,7 +82,7 @@ const Dashboard = () => {
       }
       return data || [];
     },
-    enabled: !!userId && !isLoading,
+    enabled: !!session?.user?.id && !isLoading,
     retry: false,
   });
 
@@ -102,7 +90,7 @@ const Dashboard = () => {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
-  if (!userId) {
+  if (!session) {
     return <div className="flex items-center justify-center min-h-screen">Please log in to view your dashboard</div>;
   }
 
