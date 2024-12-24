@@ -1,22 +1,51 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight, Shield, TrendingUp, DollarSign } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const Home = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN") {
         navigate("/dashboard");
+      } else if (event === "USER_DELETED") {
+        navigate("/");
       }
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  // Custom error handler for auth
+  const handleAuthError = (error: any) => {
+    console.error("Auth error:", error);
+    if (error.message.includes("Email already registered")) {
+      toast({
+        title: "Error",
+        description: "This email is already in use. Please try logging in instead.",
+        variant: "destructive",
+      });
+    } else if (error.message.includes("Invalid login credentials")) {
+      toast({
+        title: "Error",
+        description: "Invalid credentials. Please check your email and password.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   const features = [
     {
@@ -39,7 +68,6 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="px-4 py-8">
-        {/* Hero Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Invest in Your Future
@@ -49,7 +77,6 @@ const Home = () => {
           </p>
         </div>
 
-        {/* Features Grid */}
         <div className="grid grid-cols-1 gap-6 mb-12">
           {features.map((feature, index) => (
             <div
@@ -69,7 +96,6 @@ const Home = () => {
           ))}
         </div>
 
-        {/* Auth UI */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <Auth
             supabaseClient={supabase}
@@ -85,6 +111,7 @@ const Home = () => {
               },
             }}
             providers={[]}
+            onError={handleAuthError}
           />
         </div>
       </div>

@@ -46,71 +46,89 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <BrowserRouter>
-        <div className="min-h-screen bg-gray-50">
-          <main className="pb-16 max-w-md mx-auto">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route
-                path="/dashboard"
-                element={
-                  <PrivateRoute>
-                    <Dashboard />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/deposit"
-                element={
-                  <PrivateRoute>
-                    <Deposit />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/withdrawal"
-                element={
-                  <PrivateRoute>
-                    <Withdrawal />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/investments"
-                element={
-                  <PrivateRoute>
-                    <Investments />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <PrivateRoute>
-                    <Profile />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/messages"
-                element={
-                  <PrivateRoute>
-                    <Messages />
-                  </PrivateRoute>
-                }
-              />
-            </Routes>
-          </main>
-          <Navigation />
-        </div>
-      </BrowserRouter>
-      <Toaster />
-      <Sonner />
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const [session, setSession] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <BrowserRouter>
+          <div className="min-h-screen bg-gray-50">
+            <main className="pb-16 max-w-md mx-auto">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <PrivateRoute>
+                      <Dashboard />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/deposit"
+                  element={
+                    <PrivateRoute>
+                      <Deposit />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/withdrawal"
+                  element={
+                    <PrivateRoute>
+                      <Withdrawal />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/investments"
+                  element={
+                    <PrivateRoute>
+                      <Investments />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <PrivateRoute>
+                      <Profile />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/messages"
+                  element={
+                    <PrivateRoute>
+                      <Messages />
+                    </PrivateRoute>
+                  }
+                />
+              </Routes>
+            </main>
+            {session && <Navigation />}
+          </div>
+        </BrowserRouter>
+        <Toaster />
+        <Sonner />
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

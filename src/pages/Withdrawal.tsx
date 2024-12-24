@@ -1,56 +1,99 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 
 const Withdrawal = () => {
+  const { toast } = useToast();
+  const [formData, setFormData] = useState({
+    phoneNumber: "",
+    network: "",
+    accountName: "",
+    amount: "",
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle form submission here
+    console.log("Form submitted:", formData);
+    toast({
+      title: "Success",
+      description: "Withdrawal request submitted successfully",
+    });
+  };
+
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
       <h1 className="text-2xl font-bold text-gray-900">Request Withdrawal</h1>
 
-      <Card className="p-6 space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Amount (USD)
-          </label>
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-            placeholder="0.00"
-          />
-        </div>
+      <Card className="p-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <Label htmlFor="phoneNumber">Phone Number</Label>
+            <Input
+              id="phoneNumber"
+              type="tel"
+              value={formData.phoneNumber}
+              onChange={(e) =>
+                setFormData({ ...formData, phoneNumber: e.target.value })
+              }
+              required
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Withdrawal Method
-          </label>
-          <select
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-          >
-            <option>Bank Transfer</option>
-            <option>Credit Card</option>
-            <option>Cryptocurrency</option>
-          </select>
-        </div>
+          <div>
+            <Label htmlFor="network">Network</Label>
+            <Select
+              value={formData.network}
+              onValueChange={(value) =>
+                setFormData({ ...formData, network: value })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select network" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="mtn">MTN</SelectItem>
+                <SelectItem value="airteltigo">AirtelTigo</SelectItem>
+                <SelectItem value="telecel">Telecel</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Account Details
-          </label>
-          <textarea
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-            rows={3}
-            placeholder="Enter your withdrawal account details..."
-          />
-        </div>
+          <div>
+            <Label htmlFor="accountName">Name on Account</Label>
+            <Input
+              id="accountName"
+              value={formData.accountName}
+              onChange={(e) =>
+                setFormData({ ...formData, accountName: e.target.value })
+              }
+              required
+            />
+          </div>
 
-        <div className="pt-4">
-          <Button className="w-full">Submit Withdrawal Request</Button>
-        </div>
+          <div>
+            <Label htmlFor="amount">Withdrawal Amount (₵)</Label>
+            <Input
+              id="amount"
+              type="number"
+              min="0"
+              step="0.01"
+              value={formData.amount}
+              onChange={(e) =>
+                setFormData({ ...formData, amount: e.target.value })
+              }
+              required
+            />
+          </div>
 
-        <p className="text-sm text-gray-500 text-center">
-          Note: Withdrawals are processed within 1-3 business days
-        </p>
+          <Button type="submit" className="w-full">
+            Submit Withdrawal Request
+          </Button>
+        </form>
       </Card>
     </div>
   );
