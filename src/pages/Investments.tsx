@@ -41,16 +41,20 @@ const Investments = () => {
   // Create investment mutation
   const createInvestmentMutation = useMutation({
     mutationFn: async (amount: number) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
       const endDate = new Date();
       endDate.setDate(endDate.getDate() + 14); // 14 days from now
 
       const { data, error } = await supabase
         .from("investments")
-        .insert([{
+        .insert({
           amount,
+          user_id: user.id,
           end_date: endDate.toISOString(),
           daily_interest: 10, // 10% daily interest
-        }]);
+        });
       
       if (error) throw error;
       return data;
