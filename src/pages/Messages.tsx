@@ -17,42 +17,60 @@ const Messages = () => {
   const { data: messages = [], isError: isMessagesError } = useQuery({
     queryKey: ["messages"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("Not authenticated");
 
-      const { data, error } = await supabase
-        .from("messages")
-        .select("*")
-        .eq('user_id', user.id)
-        .order("created_at", { ascending: false });
-      
-      if (error) {
-        console.error("Error fetching messages:", error);
+        console.log("Fetching messages for user:", user.id);
+        const { data, error } = await supabase
+          .from("messages")
+          .select("*")
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error("Error fetching messages:", error);
+          throw error;
+        }
+
+        console.log("Messages fetched successfully:", data);
+        return data || [];
+      } catch (error) {
+        console.error("Error in messages query:", error);
         throw error;
       }
-      return data;
     },
+    retry: 1,
   });
 
   // Fetch notifications
   const { data: notifications = [], isError: isNotificationsError } = useQuery({
     queryKey: ["notifications"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("Not authenticated");
 
-      const { data, error } = await supabase
-        .from("notifications")
-        .select("*")
-        .eq('user_id', user.id)
-        .order("created_at", { ascending: false });
-      
-      if (error) {
-        console.error("Error fetching notifications:", error);
+        console.log("Fetching notifications for user:", user.id);
+        const { data, error } = await supabase
+          .from("notifications")
+          .select("*")
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error("Error fetching notifications:", error);
+          throw error;
+        }
+
+        console.log("Notifications fetched successfully:", data);
+        return data || [];
+      } catch (error) {
+        console.error("Error in notifications query:", error);
         throw error;
       }
-      return data;
     },
+    retry: 1,
   });
 
   // Send message mutation
@@ -61,6 +79,7 @@ const Messages = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      console.log("Sending message for user:", user.id);
       const { data, error } = await supabase
         .from("messages")
         .insert({
@@ -70,7 +89,12 @@ const Messages = () => {
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error sending message:", error);
+        throw error;
+      }
+
+      console.log("Message sent successfully:", data);
       return data;
     },
     onSuccess: () => {
@@ -85,7 +109,7 @@ const Messages = () => {
       console.error("Error sending message:", error);
       toast({
         title: "Error",
-        description: "Failed to send message",
+        description: "Failed to send message. Please try again.",
         variant: "destructive",
       });
     },
@@ -98,7 +122,13 @@ const Messages = () => {
   };
 
   if (isMessagesError || isNotificationsError) {
-    return <div className="p-4 text-red-500">Error loading data. Please try again later.</div>;
+    return (
+      <div className="p-4">
+        <Card className="p-4 bg-red-50 border-red-200">
+          <p className="text-red-600">Error loading data. Please try again later.</p>
+        </Card>
+      </div>
+    );
   }
 
   return (
