@@ -12,7 +12,7 @@ import Deposit from "./pages/Deposit";
 import Withdrawal from "./pages/Withdrawal";
 import Investments from "./pages/Investments";
 import Profile from "./pages/Profile";
-import Messages from "./pages/Messages";
+import Notifications from "./pages/Notifications";
 import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
@@ -113,10 +113,10 @@ const App = () => {
                   }
                 />
                 <Route
-                  path="/messages"
+                  path="/notifications"
                   element={
                     <PrivateRoute>
-                      <Messages />
+                      <Notifications />
                     </PrivateRoute>
                   }
                 />

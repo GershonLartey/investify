@@ -53,44 +53,6 @@ export type Database = {
           },
         ]
       }
-      messages: {
-        Row: {
-          content: string
-          created_at: string | null
-          id: string
-          is_admin: boolean | null
-          read: boolean | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          content: string
-          created_at?: string | null
-          id?: string
-          is_admin?: boolean | null
-          read?: boolean | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          content?: string
-          created_at?: string | null
-          id?: string
-          is_admin?: boolean | null
-          read?: boolean | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "messages_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       notifications: {
         Row: {
           created_at: string | null
@@ -98,6 +60,7 @@ export type Database = {
           message: string
           read: boolean | null
           title: string
+          type: string | null
           updated_at: string | null
           user_id: string
         }
@@ -107,6 +70,7 @@ export type Database = {
           message: string
           read?: boolean | null
           title: string
+          type?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -116,6 +80,7 @@ export type Database = {
           message?: string
           read?: boolean | null
           title?: string
+          type?: string | null
           updated_at?: string | null
           user_id?: string
         }

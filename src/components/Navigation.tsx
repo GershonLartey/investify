@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Wallet, User, MessageSquare } from "lucide-react";
+import { Home, Wallet, User, Bell } from "lucide-react";
 
 const Navigation = () => {
   const location = useLocation();
@@ -8,7 +8,7 @@ const Navigation = () => {
     { path: "/dashboard", label: "Home", icon: Home },
     { path: "/investments", label: "Investments", icon: Wallet },
     { path: "/profile", label: "Profile", icon: User },
-    { path: "/messages", label: "Messages", icon: MessageSquare },
+    { path: "/notifications", label: "Notifications", icon: Bell },
   ];
 
   const isActive = (path: string) => location.pathname === path;
