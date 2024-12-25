@@ -69,7 +69,7 @@ const App = () => {
       <TooltipProvider>
         <BrowserRouter>
           <div className="min-h-screen bg-gray-50">
-            <main className="pb-16 max-w-md mx-auto">
+            <main className="pb-16 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route

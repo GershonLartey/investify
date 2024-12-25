@@ -24,7 +24,7 @@ const Admin = () => {
           .eq("id", user.id)
           .single();
 
-        if (error || !profile || user.email !== "bankify@gpublic") {
+        if (error || !profile || user.email !== "gpublic@bankify.com") {
           toast({
             title: "Access Denied",
             description: "You don't have permission to access this page.",
@@ -48,7 +48,7 @@ const Admin = () => {
   }
 
   return (
-    <div className="p-4">
+    <div className="p-6 max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
       <div className="grid gap-4">
         <div className="bg-white p-4 rounded-lg shadow">
