@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "./components/Navigation";
+import TidioChat from "./components/TidioChat";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Deposit from "./pages/Deposit";
@@ -131,6 +132,7 @@ const App = () => {
               </Routes>
             </main>
             {session && <Navigation />}
+            <TidioChat />
           </div>
         </BrowserRouter>
         <Toaster />

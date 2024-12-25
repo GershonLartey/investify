@@ -20,23 +20,42 @@ const Investments = () => {
     { amount: 5000, label: "₵5,000" },
   ];
 
-  // Fetch user's balance
-  const { data: profile } = useQuery({
-    queryKey: ["profile"],
+  // Fetch user's balance and active investments
+  const { data: userData } = useQuery({
+    queryKey: ["user-investments-data"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-      
-      if (error) throw error;
-      return data;
+      const [profileResult, investmentsResult] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("balance")
+          .eq("id", user.id)
+          .single(),
+        supabase
+          .from("investments")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("status", "active"),
+      ]);
+
+      if (profileResult.error) throw profileResult.error;
+      if (investmentsResult.error) throw investmentsResult.error;
+
+      return {
+        profile: profileResult.data,
+        investments: investmentsResult.data,
+      };
     },
   });
+
+  // Calculate total investment and expected returns
+  const totalInvested = userData?.investments?.reduce((sum, inv) => sum + inv.amount, 0) || 0;
+  const totalExpectedReturns = userData?.investments?.reduce((sum, inv) => {
+    const daysRemaining = Math.ceil((new Date(inv.end_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+    return sum + (inv.amount * (inv.daily_interest / 100) * daysRemaining);
+  }, 0) || 0;
 
   // Create investment mutation
   const createInvestmentMutation = useMutation({
@@ -60,7 +79,7 @@ const Investments = () => {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      queryClient.invalidateQueries({ queryKey: ["user-investments-data"] });
       toast({
         title: "Success",
         description: "Investment package purchased successfully",
@@ -76,7 +95,7 @@ const Investments = () => {
   });
 
   const handleInvest = (amount: number) => {
-    if (!profile) {
+    if (!userData?.profile) {
       toast({
         title: "Error",
         description: "Please log in to invest",
@@ -85,7 +104,7 @@ const Investments = () => {
       return;
     }
 
-    if (profile.balance < amount) {
+    if (userData.profile.balance < amount) {
       toast({
         title: "Insufficient balance",
         description: "Please deposit more funds to invest in this package",
@@ -100,6 +119,18 @@ const Investments = () => {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-gray-900">Investment Packages</h1>
+
+      {/* Investment Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <Card className="p-4">
+          <h3 className="text-lg font-semibold mb-2">Total Invested</h3>
+          <p className="text-2xl font-bold">₵{totalInvested.toFixed(2)}</p>
+        </Card>
+        <Card className="p-4">
+          <h3 className="text-lg font-semibold mb-2">Expected Returns</h3>
+          <p className="text-2xl font-bold">₵{totalExpectedReturns.toFixed(2)}</p>
+        </Card>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {packages.map((pkg, index) => (
@@ -124,10 +155,10 @@ const Investments = () => {
             <Button 
               className="w-full"
               onClick={() => handleInvest(pkg.amount)}
-              disabled={!profile || profile.balance < pkg.amount}
+              disabled={!userData?.profile || userData.profile.balance < pkg.amount}
             >
-              {!profile ? "Login to Invest" : 
-               profile.balance < pkg.amount ? "Insufficient Balance" : 
+              {!userData?.profile ? "Login to Invest" : 
+               userData.profile.balance < pkg.amount ? "Insufficient Balance" : 
                "Invest Now"}
             </Button>
           </Card>

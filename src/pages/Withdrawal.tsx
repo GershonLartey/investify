@@ -5,9 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const Withdrawal = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     phoneNumber: "",
     network: "",
@@ -15,14 +18,58 @@ const Withdrawal = () => {
     amount: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log("Form submitted:", formData);
-    toast({
-      title: "Success",
-      description: "Withdrawal request submitted successfully",
-    });
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      // Check user's balance
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('balance')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) throw profileError;
+      
+      const withdrawalAmount = parseFloat(formData.amount);
+      if (!profile || profile.balance < withdrawalAmount) {
+        toast({
+          title: "Insufficient Balance",
+          description: "You don't have enough balance for this withdrawal",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error } = await supabase
+        .from('transactions')
+        .insert({
+          user_id: user.id,
+          type: 'withdrawal',
+          amount: withdrawalAmount,
+          account_name: formData.accountName,
+          phone_number: formData.phoneNumber,
+          network: formData.network,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Withdrawal request submitted successfully. Awaiting admin approval.",
+      });
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error submitting withdrawal:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit withdrawal request",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

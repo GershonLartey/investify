@@ -5,9 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const Deposit = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     accountName: "",
     email: "",
@@ -16,7 +19,7 @@ const Deposit = () => {
     amount: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.amount) {
       toast({
@@ -26,12 +29,37 @@ const Deposit = () => {
       });
       return;
     }
-    // Handle form submission here
-    console.log("Form submitted:", formData);
-    toast({
-      title: "Success",
-      description: "Deposit request submitted successfully",
-    });
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { error } = await supabase
+        .from('transactions')
+        .insert({
+          user_id: user.id,
+          type: 'deposit',
+          amount: parseFloat(formData.amount),
+          account_name: formData.accountName,
+          phone_number: formData.phoneNumber,
+          transaction_id: formData.transactionId,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Deposit request submitted successfully. Awaiting admin approval.",
+      });
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error submitting deposit:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit deposit request",
+        variant: "destructive",
+      });
+    }
   };
 
   const amounts = [50, 100, 250, 500, 1000, 2500, 4000, 5000];
