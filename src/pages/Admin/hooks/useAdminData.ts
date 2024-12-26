@@ -21,13 +21,13 @@ export const useAdminData = (isLoading: boolean) => {
       const { data, error } = await supabase
         .from('transactions')
         .select('*')
-        .order('created_at', { ascending: false })
-        .limit(10);
+        .order('created_at', { ascending: false });
       
       if (error) throw error;
       return data || [];
     },
     enabled: !isLoading,
+    refetchInterval: 5000, // Refetch every 5 seconds to get new transactions
   });
 
   const { data: investments } = useQuery({

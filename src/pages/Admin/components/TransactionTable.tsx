@@ -34,6 +34,7 @@ const TransactionTable = ({ transactions }: TransactionTableProps) => {
 
   const handleApprove = async (transaction: Transaction) => {
     try {
+      console.log('Approving transaction:', transaction);
       const { error } = await supabase
         .from('transactions')
         .update({ status: 'approved' })
@@ -61,6 +62,7 @@ const TransactionTable = ({ transactions }: TransactionTableProps) => {
 
   const handleReject = async (transaction: Transaction) => {
     try {
+      console.log('Rejecting transaction:', transaction);
       const { error } = await supabase
         .from('transactions')
         .update({ status: 'rejected' })
