@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import UserTable from "./components/UserTable";
 import TransactionTable from "./components/TransactionTable";
 import InvestmentTable from "./components/InvestmentTable";
@@ -47,7 +47,13 @@ const Admin = () => {
     checkAdminAccess();
   }, [navigate, toast]);
 
-  const { users, transactions, investments } = useAdminData(isLoading);
+  const {
+    users,
+    transactions,
+    investments,
+    handleTransactionApproval,
+    handleTransactionRejection,
+  } = useAdminData(isLoading);
 
   if (isLoading) {
     return <div className="p-4">Loading...</div>;
@@ -58,7 +64,11 @@ const Admin = () => {
       <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
       
       <UserTable users={users || []} />
-      <TransactionTable transactions={transactions || []} />
+      <TransactionTable
+        transactions={transactions || []}
+        onApprove={handleTransactionApproval}
+        onReject={handleTransactionRejection}
+      />
       <InvestmentTable investments={investments || []} />
     </div>
   );
