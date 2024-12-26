@@ -19,11 +19,12 @@ const TransactionTable = ({ transactions, onApprove, onReject }: TransactionTabl
   console.log('Rendering TransactionTable with transactions:', transactions);
   
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">Recent Transactions</h2>
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold">Recent Transactions</h2>
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>User ID</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Amount</TableHead>
             <TableHead>Status</TableHead>
@@ -34,15 +35,27 @@ const TransactionTable = ({ transactions, onApprove, onReject }: TransactionTabl
         <TableBody>
           {transactions?.map((transaction) => (
             <TableRow key={transaction.id}>
+              <TableCell className="font-mono text-sm">{transaction.user_id}</TableCell>
               <TableCell className="capitalize">{transaction.type}</TableCell>
               <TableCell>${transaction.amount.toFixed(2)}</TableCell>
-              <TableCell className="capitalize">{transaction.status}</TableCell>
+              <TableCell>
+                <span className={`px-2 py-1 rounded-full text-xs ${
+                  transaction.status === 'pending' 
+                    ? 'bg-yellow-100 text-yellow-800' 
+                    : transaction.status === 'approved'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'
+                }`}>
+                  {transaction.status}
+                </span>
+              </TableCell>
               <TableCell>{new Date(transaction.created_at).toLocaleDateString()}</TableCell>
               <TableCell>
                 {transaction.status === 'pending' && (
                   <div className="flex gap-2">
                     <Button
                       size="sm"
+                      variant="default"
                       onClick={() => onApprove(transaction)}
                     >
                       Approve
@@ -59,6 +72,13 @@ const TransactionTable = ({ transactions, onApprove, onReject }: TransactionTabl
               </TableCell>
             </TableRow>
           ))}
+          {(!transactions || transactions.length === 0) && (
+            <TableRow>
+              <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
+                No transactions found
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </div>
