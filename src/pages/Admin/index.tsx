@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import UserTable from "./components/UserTable";
 import TransactionTable from "./components/TransactionTable";
 import InvestmentTable from "./components/InvestmentTable";
@@ -15,9 +15,11 @@ const Admin = () => {
   useEffect(() => {
     const checkAdminAccess = async () => {
       try {
+        console.log('Checking admin access...');
         const { data: { user } } = await supabase.auth.getUser();
         
         if (!user) {
+          console.log('No user found, redirecting to home');
           navigate("/");
           return;
         }
@@ -29,12 +31,15 @@ const Admin = () => {
           .single();
 
         if (error || !profile || user.email !== "gpublic@bankify.com") {
+          console.log('Access denied:', { error, profile, userEmail: user.email });
           toast({
             title: "Access Denied",
             description: "You don't have permission to access this page.",
             variant: "destructive",
           });
           navigate("/dashboard");
+        } else {
+          console.log('Admin access granted');
         }
       } catch (error) {
         console.error("Error checking admin access:", error);

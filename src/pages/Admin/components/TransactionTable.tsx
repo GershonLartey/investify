@@ -16,6 +16,8 @@ interface TransactionTableProps {
 }
 
 const TransactionTable = ({ transactions, onApprove, onReject }: TransactionTableProps) => {
+  console.log('Rendering TransactionTable with transactions:', transactions);
+  
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Recent Transactions</h2>
