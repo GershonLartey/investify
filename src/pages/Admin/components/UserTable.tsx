@@ -11,13 +11,18 @@ import { supabase } from "@/integrations/supabase/client";
 
 type User = {
   id: string;
-  email: string;
+  username: string | null;
   balance: number;
   created_at: string;
 };
 
 interface UserTableProps {
   users: User[];
+}
+
+interface AuthUser {
+  id: string;
+  email?: string;
 }
 
 const UserTable = ({ users }: UserTableProps) => {
@@ -27,10 +32,12 @@ const UserTable = ({ users }: UserTableProps) => {
     queryFn: async () => {
       const { data: { users }, error } = await supabase.auth.admin.listUsers();
       if (error) throw error;
-      return users.reduce((acc: Record<string, string>, user) => {
-        acc[user.id] = user.email || 'No email';
-        return acc;
-      }, {});
+      
+      const emailMap: Record<string, string> = {};
+      users?.forEach((user: AuthUser) => {
+        emailMap[user.id] = user.email || 'No email';
+      });
+      return emailMap;
     },
   });
 

@@ -11,13 +11,17 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 
-type Transaction = {
+export type Transaction = {
   id: string;
   type: string;
   amount: number;
   status: string;
   created_at: string;
   user_id: string;
+  account_name?: string | null;
+  network?: string | null;
+  phone_number?: string | null;
+  transaction_id?: string | null;
 };
 
 interface TransactionTableProps {

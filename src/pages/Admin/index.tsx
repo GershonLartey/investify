@@ -49,29 +49,6 @@ const Admin = () => {
 
   const { users, transactions, investments } = useAdminData(isLoading);
 
-  const handleApproveTransaction = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('transactions')
-        .update({ status: 'approved' })
-        .eq('id', id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Transaction approved successfully",
-      });
-    } catch (error) {
-      console.error('Error approving transaction:', error);
-      toast({
-        title: "Error",
-        description: "Failed to approve transaction",
-        variant: "destructive",
-      });
-    }
-  };
-
   if (isLoading) {
     return <div className="p-4">Loading...</div>;
   }
@@ -81,10 +58,7 @@ const Admin = () => {
       <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
       
       <UserTable users={users || []} />
-      <TransactionTable 
-        transactions={transactions || []} 
-        onApprove={handleApproveTransaction}
-      />
+      <TransactionTable transactions={transactions || []} />
       <InvestmentTable investments={investments || []} />
     </div>
   );
