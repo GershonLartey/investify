@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import UserTable from "./components/UserTable";
-import TransactionTable from "./components/TransactionTable";
+import TransactionTabs from "./components/TransactionTabs";
 import InvestmentTable from "./components/InvestmentTable";
 import { useAdminData } from "./hooks/useAdminData";
 
@@ -69,7 +69,7 @@ const Admin = () => {
       <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
       
       <UserTable users={users || []} />
-      <TransactionTable
+      <TransactionTabs
         transactions={transactions || []}
         onApprove={handleTransactionApproval}
         onReject={handleTransactionRejection}

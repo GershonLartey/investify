@@ -19,8 +19,7 @@ const TransactionTable = ({ transactions, onApprove, onReject }: TransactionTabl
   console.log('Rendering TransactionTable with transactions:', transactions);
   
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Recent Transactions</h2>
+    <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
