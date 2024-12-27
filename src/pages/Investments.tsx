@@ -66,17 +66,41 @@ const Investments = () => {
       const endDate = new Date();
       endDate.setDate(endDate.getDate() + 14); // 14 days from now
 
-      const { data, error } = await supabase
+      // Start a transaction
+      const { data: investment, error: investmentError } = await supabase
         .from("investments")
         .insert({
           amount,
           user_id: user.id,
           end_date: endDate.toISOString(),
           daily_interest: 10, // 10% daily interest
-        });
+        })
+        .select()
+        .single();
       
-      if (error) throw error;
-      return data;
+      if (investmentError) throw investmentError;
+
+      // Create a transaction record
+      const { error: transactionError } = await supabase
+        .from("transactions")
+        .insert({
+          user_id: user.id,
+          type: 'investment',
+          amount: amount,
+          status: 'approved'
+        });
+
+      if (transactionError) throw transactionError;
+
+      // Update user's balance
+      const { error: balanceError } = await supabase
+        .from("profiles")
+        .update({ balance: userData?.profile?.balance - amount })
+        .eq('id', user.id);
+
+      if (balanceError) throw balanceError;
+
+      return investment;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-investments-data"] });
@@ -85,7 +109,8 @@ const Investments = () => {
         description: "Investment package purchased successfully",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Investment error:', error);
       toast({
         title: "Error",
         description: "Failed to purchase investment package",

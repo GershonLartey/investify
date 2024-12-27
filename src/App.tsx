@@ -15,6 +15,7 @@ import Investments from "./pages/Investments";
 import Profile from "./pages/Profile";
 import Notifications from "./pages/Notifications";
 import Admin from "./pages/Admin";
+import TransactionHistory from "./pages/TransactionHistory";
 
 const queryClient = new QueryClient();
 
@@ -119,6 +120,14 @@ const App = () => {
                     element={
                       <PrivateRoute>
                         <Notifications />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/transactions"
+                    element={
+                      <PrivateRoute>
+                        <TransactionHistory />
                       </PrivateRoute>
                     }
                   />
