@@ -7,7 +7,6 @@ export const useAdminData = (isLoading: boolean) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch users
   const { data: users } = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
@@ -83,7 +82,6 @@ export const useAdminData = (isLoading: boolean) => {
         description: "Transaction approved successfully",
       });
 
-      // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['admin-transactions'] });
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
     } catch (error) {
@@ -111,7 +109,6 @@ export const useAdminData = (isLoading: boolean) => {
         description: "Transaction rejected successfully",
       });
 
-      // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['admin-transactions'] });
     } catch (error) {
       console.error('Error rejecting transaction:', error);

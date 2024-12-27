@@ -57,6 +57,7 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          is_broadcast: boolean | null
           message: string
           read: boolean | null
           title: string
@@ -67,6 +68,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           id?: string
+          is_broadcast?: boolean | null
           message: string
           read?: boolean | null
           title: string
@@ -77,6 +79,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           id?: string
+          is_broadcast?: boolean | null
           message?: string
           read?: boolean | null
           title?: string
@@ -194,6 +197,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      withdrawal_settings: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean | null
+          minimum_amount: number
+          network: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          minimum_amount?: number
+          network: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          minimum_amount?: number
+          network?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {

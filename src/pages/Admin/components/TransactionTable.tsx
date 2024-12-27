@@ -36,7 +36,7 @@ const TransactionTable = ({ transactions, onApprove, onReject }: TransactionTabl
             <TableRow key={transaction.id}>
               <TableCell className="font-mono text-sm">{transaction.user_id}</TableCell>
               <TableCell className="capitalize">{transaction.type}</TableCell>
-              <TableCell>${transaction.amount.toFixed(2)}</TableCell>
+              <TableCell>₵{transaction.amount.toFixed(2)}</TableCell>
               <TableCell>
                 <span className={`px-2 py-1 rounded-full text-xs ${
                   transaction.status === 'pending' 
