@@ -21,7 +21,7 @@ const Investments = () => {
   ];
 
   // Fetch user's balance and active investments
-  const { data: userData } = useQuery({
+  const { data: userData, isLoading } = useQuery({
     queryKey: ["user-investments-data"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -116,6 +116,10 @@ const Investments = () => {
     createInvestmentMutation.mutate(amount);
   };
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-gray-900">Investment Packages</h1>
@@ -124,11 +128,14 @@ const Investments = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <Card className="p-4">
           <h3 className="text-lg font-semibold mb-2">Total Invested</h3>
-          <p className="text-2xl font-bold">₵{totalInvested.toFixed(2)}</p>
+          <p className="text-2xl font-bold">₵{(userData?.investments?.reduce((sum, inv) => sum + inv.amount, 0) || 0).toFixed(2)}</p>
         </Card>
         <Card className="p-4">
           <h3 className="text-lg font-semibold mb-2">Expected Returns</h3>
-          <p className="text-2xl font-bold">₵{totalExpectedReturns.toFixed(2)}</p>
+          <p className="text-2xl font-bold">₵{(userData?.investments?.reduce((sum, inv) => {
+            const daysRemaining = Math.ceil((new Date(inv.end_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+            return sum + (inv.amount * (inv.daily_interest / 100) * daysRemaining);
+          }, 0) || 0).toFixed(2)}</p>
         </Card>
       </div>
 
@@ -155,11 +162,9 @@ const Investments = () => {
             <Button 
               className="w-full"
               onClick={() => handleInvest(pkg.amount)}
-              disabled={!userData?.profile || userData.profile.balance < pkg.amount}
+              disabled={userData?.profile?.balance < pkg.amount}
             >
-              {!userData?.profile ? "Login to Invest" : 
-               userData.profile.balance < pkg.amount ? "Insufficient Balance" : 
-               "Invest Now"}
+              {userData?.profile?.balance < pkg.amount ? "Insufficient Balance" : "Invest Now"}
             </Button>
           </Card>
         ))}
