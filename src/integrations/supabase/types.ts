@@ -230,6 +230,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_daily_investment_returns: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       check_and_update_investments: {
         Args: Record<PropertyKey, never>
         Returns: undefined
