@@ -37,7 +37,12 @@ const InvestmentRatioChart = ({ totalPaidOut, totalPending }: InvestmentRatioCha
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+            <Tooltip 
+              formatter={(value: number | string) => {
+                const numValue = typeof value === 'string' ? parseFloat(value) : value;
+                return `$${numValue.toFixed(2)}`;
+              }}
+            />
             <Legend />
           </PieChart>
         </ResponsiveContainer>
