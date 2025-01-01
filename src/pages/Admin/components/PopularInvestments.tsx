@@ -8,16 +8,17 @@ interface Investment {
 
 interface PopularInvestmentsProps {
   investments: Investment[];
+  className?: string;
 }
 
-const PopularInvestments = ({ investments }: PopularInvestmentsProps) => {
+const PopularInvestments = ({ investments, className }: PopularInvestmentsProps) => {
   const data = investments.map(inv => ({
     amount: `$${inv.amount}`,
     count: inv.count
   }));
 
   return (
-    <Card className="col-span-2">
+    <Card className={className}>
       <CardHeader>
         <CardTitle>Most Popular Investment Packages</CardTitle>
       </CardHeader>
