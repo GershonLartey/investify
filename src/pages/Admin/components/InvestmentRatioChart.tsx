@@ -15,7 +15,7 @@ const InvestmentRatioChart = ({ totalPaidOut, totalPending }: InvestmentRatioCha
   ];
 
   return (
-    <Card>
+    <Card className="bg-white shadow-lg">
       <CardHeader>
         <CardTitle>Investment Payout Ratio</CardTitle>
       </CardHeader>
@@ -37,8 +37,10 @@ const InvestmentRatioChart = ({ totalPaidOut, totalPending }: InvestmentRatioCha
             </Pie>
             <Tooltip 
               formatter={(value: number | string) => {
-                const numValue = typeof value === 'string' ? parseFloat(value) : value;
-                return `$${numValue.toFixed(2)}`;
+                if (typeof value === 'string') {
+                  return `$${parseFloat(value).toFixed(2)}`;
+                }
+                return `$${value.toFixed(2)}`;
               }}
             />
             <Legend />

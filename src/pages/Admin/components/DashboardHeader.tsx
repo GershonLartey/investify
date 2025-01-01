@@ -10,7 +10,7 @@ interface DashboardHeaderProps {
 const DashboardHeader = ({ totalDeposits, totalWithdrawals, netBalance }: DashboardHeaderProps) => {
   return (
     <div className="grid gap-4 md:grid-cols-3">
-      <Card>
+      <Card className="bg-white shadow-lg">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Deposits</CardTitle>
           <DollarSign className="h-4 w-4 text-primary" />
@@ -20,7 +20,7 @@ const DashboardHeader = ({ totalDeposits, totalWithdrawals, netBalance }: Dashbo
           <p className="text-xs text-muted-foreground">All time deposits</p>
         </CardContent>
       </Card>
-      <Card>
+      <Card className="bg-white shadow-lg">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Withdrawals</CardTitle>
           <DollarSign className="h-4 w-4 text-primary" />
@@ -30,7 +30,7 @@ const DashboardHeader = ({ totalDeposits, totalWithdrawals, netBalance }: Dashbo
           <p className="text-xs text-muted-foreground">All time withdrawals</p>
         </CardContent>
       </Card>
-      <Card>
+      <Card className="bg-white shadow-lg">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Net Balance</CardTitle>
           <ChartBar className="h-4 w-4 text-primary" />

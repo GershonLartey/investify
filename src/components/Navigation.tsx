@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Wallet, ArrowUpDown, TrendingUp, User, Bell } from "lucide-react";
+import { Home, TrendingUp, User, Bell } from "lucide-react";
 
 const Navigation = () => {
   const location = useLocation();
@@ -17,26 +17,6 @@ const Navigation = () => {
           >
             <Home className="h-6 w-6" />
             <span className="text-xs mt-1">Home</span>
-          </Link>
-
-          <Link
-            to="/deposit"
-            className={`flex flex-col items-center p-2 ${
-              isActive("/deposit") ? "text-primary" : "text-gray-500"
-            }`}
-          >
-            <Wallet className="h-6 w-6" />
-            <span className="text-xs mt-1">Deposit</span>
-          </Link>
-
-          <Link
-            to="/transactions"
-            className={`flex flex-col items-center p-2 ${
-              isActive("/transactions") ? "text-primary" : "text-gray-500"
-            }`}
-          >
-            <ArrowUpDown className="h-6 w-6" />
-            <span className="text-xs mt-1">History</span>
           </Link>
 
           <Link

@@ -18,7 +18,7 @@ const PopularInvestments = ({ investments, className }: PopularInvestmentsProps)
   }));
 
   return (
-    <Card className={className}>
+    <Card className={`bg-white shadow-lg ${className}`}>
       <CardHeader>
         <CardTitle>Most Popular Investment Packages</CardTitle>
       </CardHeader>
