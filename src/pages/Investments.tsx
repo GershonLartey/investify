@@ -1,13 +1,17 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, Shield, Clock } from "lucide-react";
+import { Activity } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import InvestmentPackage from "./Investments/components/InvestmentPackage";
+import InvestmentTrackingModal from "./Investments/components/InvestmentTrackingModal";
 
 const Investments = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [trackingModalOpen, setTrackingModalOpen] = useState(false);
 
   const packages = [
     { amount: 50, label: "₵50" },
@@ -20,7 +24,6 @@ const Investments = () => {
     { amount: 5000, label: "₵5,000" },
   ];
 
-  // Fetch user's balance and active investments
   const { data: userData, isLoading } = useQuery({
     queryKey: ["user-investments-data"],
     queryFn: async () => {
@@ -50,37 +53,27 @@ const Investments = () => {
     },
   });
 
-  // Calculate total investment and expected returns
-  const totalInvested = userData?.investments?.reduce((sum, inv) => sum + inv.amount, 0) || 0;
-  const totalExpectedReturns = userData?.investments?.reduce((sum, inv) => {
-    const daysRemaining = Math.ceil((new Date(inv.end_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-    return sum + (inv.amount * (inv.daily_interest / 100) * daysRemaining);
-  }, 0) || 0;
-
-  // Create investment mutation
   const createInvestmentMutation = useMutation({
     mutationFn: async (amount: number) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
       const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 14); // 14 days from now
+      endDate.setDate(endDate.getDate() + 14);
 
-      // Start a transaction
       const { data: investment, error: investmentError } = await supabase
         .from("investments")
         .insert({
           amount,
           user_id: user.id,
           end_date: endDate.toISOString(),
-          daily_interest: 10, // 10% daily interest
+          daily_interest: 10,
         })
         .select()
         .single();
       
       if (investmentError) throw investmentError;
 
-      // Create a transaction record
       const { error: transactionError } = await supabase
         .from("transactions")
         .insert({
@@ -92,7 +85,6 @@ const Investments = () => {
 
       if (transactionError) throw transactionError;
 
-      // Update user's balance
       const { error: balanceError } = await supabase
         .from("profiles")
         .update({ balance: userData?.profile?.balance - amount })
@@ -147,53 +139,52 @@ const Investments = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Investment Packages</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-gray-900">Investment Packages</h1>
+        <Button 
+          variant="outline"
+          onClick={() => setTrackingModalOpen(true)}
+          className="gap-2"
+        >
+          <Activity className="h-4 w-4" />
+          Check Active Investments
+        </Button>
+      </div>
 
-      {/* Investment Summary */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <Card className="p-4">
           <h3 className="text-lg font-semibold mb-2">Total Invested</h3>
-          <p className="text-2xl font-bold">₵{(userData?.investments?.reduce((sum, inv) => sum + inv.amount, 0) || 0).toFixed(2)}</p>
+          <p className="text-2xl font-bold">
+            ₵{(userData?.investments?.reduce((sum, inv) => sum + inv.amount, 0) || 0).toFixed(2)}
+          </p>
         </Card>
         <Card className="p-4">
           <h3 className="text-lg font-semibold mb-2">Expected Returns</h3>
-          <p className="text-2xl font-bold">₵{(userData?.investments?.reduce((sum, inv) => {
-            const daysRemaining = Math.ceil((new Date(inv.end_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-            return sum + (inv.amount * (inv.daily_interest / 100) * daysRemaining);
-          }, 0) || 0).toFixed(2)}</p>
+          <p className="text-2xl font-bold">
+            ₵{(userData?.investments?.reduce((sum, inv) => {
+              const daysRemaining = Math.ceil((new Date(inv.end_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+              return sum + (inv.amount * (inv.daily_interest / 100) * daysRemaining);
+            }, 0) || 0).toFixed(2)}
+          </p>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {packages.map((pkg, index) => (
-          <Card key={index} className="p-6 space-y-4">
-            <h3 className="text-xl font-semibold text-gray-900">{pkg.label}</h3>
-            
-            <div className="space-y-2">
-              <div className="flex items-center text-sm text-gray-600">
-                <TrendingUp className="h-4 w-4 mr-2" />
-                <span>Returns: 10% Daily</span>
-              </div>
-              <div className="flex items-center text-sm text-gray-600">
-                <Shield className="h-4 w-4 mr-2" />
-                <span>Duration: 14 Days</span>
-              </div>
-              <div className="flex items-center text-sm text-gray-600">
-                <Clock className="h-4 w-4 mr-2" />
-                <span>Total Return: 140%</span>
-              </div>
-            </div>
-
-            <Button 
-              className="w-full"
-              onClick={() => handleInvest(pkg.amount)}
-              disabled={userData?.profile?.balance < pkg.amount}
-            >
-              {userData?.profile?.balance < pkg.amount ? "Insufficient Balance" : "Invest Now"}
-            </Button>
-          </Card>
+          <InvestmentPackage
+            key={index}
+            amount={pkg.amount}
+            label={pkg.label}
+            onInvest={handleInvest}
+            disabled={userData?.profile?.balance < pkg.amount}
+          />
         ))}
       </div>
+
+      <InvestmentTrackingModal
+        open={trackingModalOpen}
+        onOpenChange={setTrackingModalOpen}
+      />
     </div>
   );
 };
