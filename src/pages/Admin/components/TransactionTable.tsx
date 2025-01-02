@@ -24,6 +24,8 @@ const TransactionTable = ({ transactions, onApprove, onReject }: TransactionTabl
         <TableHeader>
           <TableRow>
             <TableHead>User ID</TableHead>
+            <TableHead>Account Name</TableHead>
+            <TableHead>Phone</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Amount</TableHead>
             <TableHead>Status</TableHead>
@@ -35,6 +37,8 @@ const TransactionTable = ({ transactions, onApprove, onReject }: TransactionTabl
           {transactions?.map((transaction) => (
             <TableRow key={transaction.id}>
               <TableCell className="font-mono text-sm">{transaction.user_id}</TableCell>
+              <TableCell>{transaction.account_name || 'N/A'}</TableCell>
+              <TableCell>{transaction.phone_number || 'N/A'}</TableCell>
               <TableCell className="capitalize">{transaction.type}</TableCell>
               <TableCell>₵{transaction.amount.toFixed(2)}</TableCell>
               <TableCell>
@@ -73,7 +77,7 @@ const TransactionTable = ({ transactions, onApprove, onReject }: TransactionTabl
           ))}
           {(!transactions || transactions.length === 0) && (
             <TableRow>
-              <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
+              <TableCell colSpan={8} className="text-center py-4 text-muted-foreground">
                 No transactions found
               </TableCell>
             </TableRow>

@@ -10,6 +10,9 @@ interface InvestmentPackageProps {
 }
 
 const InvestmentPackage = ({ amount, label, onInvest, disabled }: InvestmentPackageProps) => {
+  const dailyReturn = amount * 0.10; // 10% daily return
+  const totalReturn = dailyReturn * 14; // 14 days investment period
+
   return (
     <Card className="p-6 space-y-4">
       <h3 className="text-xl font-semibold text-gray-900">{label}</h3>
@@ -17,7 +20,7 @@ const InvestmentPackage = ({ amount, label, onInvest, disabled }: InvestmentPack
       <div className="space-y-2">
         <div className="flex items-center text-sm text-gray-600">
           <TrendingUp className="h-4 w-4 mr-2" />
-          <span>Returns: 10% Daily</span>
+          <span>Daily Returns: ₵{dailyReturn.toFixed(2)}</span>
         </div>
         <div className="flex items-center text-sm text-gray-600">
           <Shield className="h-4 w-4 mr-2" />
@@ -25,7 +28,7 @@ const InvestmentPackage = ({ amount, label, onInvest, disabled }: InvestmentPack
         </div>
         <div className="flex items-center text-sm text-gray-600">
           <Clock className="h-4 w-4 mr-2" />
-          <span>Total Return: 140%</span>
+          <span>Total Return: ₵{totalReturn.toFixed(2)}</span>
         </div>
       </div>
 
