@@ -74,7 +74,6 @@ export const useAdminData = (isLoading: boolean) => {
     }
   });
 
-  // Show error toasts if any query fails
   React.useEffect(() => {
     if (usersError || transactionsError || investmentsError) {
       toast({

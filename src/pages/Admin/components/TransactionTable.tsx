@@ -16,14 +16,11 @@ interface TransactionTableProps {
 }
 
 const TransactionTable = ({ transactions, onApprove, onReject }: TransactionTableProps) => {
-  console.log('Rendering TransactionTable with transactions:', transactions);
-  
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>User ID</TableHead>
             <TableHead>Account Name</TableHead>
             <TableHead>Phone</TableHead>
             <TableHead>Type</TableHead>
@@ -36,7 +33,6 @@ const TransactionTable = ({ transactions, onApprove, onReject }: TransactionTabl
         <TableBody>
           {transactions?.map((transaction) => (
             <TableRow key={transaction.id}>
-              <TableCell className="font-mono text-sm">{transaction.user_id}</TableCell>
               <TableCell>{transaction.account_name || 'N/A'}</TableCell>
               <TableCell>{transaction.phone_number || 'N/A'}</TableCell>
               <TableCell className="capitalize">{transaction.type}</TableCell>
@@ -77,7 +73,7 @@ const TransactionTable = ({ transactions, onApprove, onReject }: TransactionTabl
           ))}
           {(!transactions || transactions.length === 0) && (
             <TableRow>
-              <TableCell colSpan={8} className="text-center py-4 text-muted-foreground">
+              <TableCell colSpan={7} className="text-center py-4 text-muted-foreground">
                 No transactions found
               </TableCell>
             </TableRow>
