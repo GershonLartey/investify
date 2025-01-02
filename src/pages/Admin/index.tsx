@@ -7,7 +7,7 @@ import MetricsCard from "./components/MetricsCard";
 import TransactionList from "./components/TransactionList";
 import RevenueChart from "./components/RevenueChart";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ReloadIcon } from "lucide-react";
+import { Loader } from "lucide-react";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -84,7 +84,7 @@ const Admin = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <ReloadIcon className="h-6 w-6 animate-spin" />
+        <Loader className="h-6 w-6 animate-spin" />
       </div>
     );
   }
