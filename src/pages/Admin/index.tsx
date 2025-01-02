@@ -6,6 +6,8 @@ import { useAdminData } from "./hooks/useAdminData";
 import MetricsCard from "./components/MetricsCard";
 import TransactionList from "./components/TransactionList";
 import RevenueChart from "./components/RevenueChart";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ReloadIcon } from "@lucide-react";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -29,6 +31,7 @@ const Admin = () => {
           .single();
 
         if (error || !profile || user.email !== "gpublic@bankify.com") {
+          console.error("Admin access error:", error);
           toast({
             title: "Access Denied",
             description: "You don't have permission to access this page.",
@@ -53,15 +56,12 @@ const Admin = () => {
     investments,
     handleTransactionApproval,
     handleTransactionRejection,
+    isError,
   } = useAdminData(isLoading);
 
-  // Calculate total balance across all users
+  // Calculate metrics
   const totalBalance = users?.reduce((sum, user) => sum + (user.balance || 0), 0) || 0;
-
-  // Calculate total investments
   const totalInvestments = investments?.reduce((sum, inv) => sum + inv.amount, 0) || 0;
-
-  // Calculate recent transaction total
   const recentTransactionsTotal = transactions
     ?.filter(t => t.status === 'approved')
     ?.reduce((sum, t) => sum + t.amount, 0) || 0;
@@ -82,7 +82,23 @@ const Admin = () => {
     .slice(-7) || [];
 
   if (isLoading) {
-    return <div className="p-4">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <ReloadIcon className="h-6 w-6 animate-spin" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-6">
+        <Alert variant="destructive">
+          <AlertDescription>
+            Failed to load admin data. Please refresh the page to try again.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
   }
 
   return (
@@ -111,7 +127,11 @@ const Admin = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <RevenueChart data={revenueData} />
-        <TransactionList transactions={transactions || []} />
+        <TransactionList 
+          transactions={transactions || []} 
+          onApprove={handleTransactionApproval}
+          onReject={handleTransactionRejection}
+        />
       </div>
     </div>
   );

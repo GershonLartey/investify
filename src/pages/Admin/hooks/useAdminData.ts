@@ -1,13 +1,13 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import type { Transaction, User, Investment } from "../types";
 
 export const useAdminData = (isLoading: boolean) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: users } = useQuery({
+  const { data: users, error: usersError } = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
       console.log('Fetching users...');
@@ -22,9 +22,13 @@ export const useAdminData = (isLoading: boolean) => {
       return data as User[];
     },
     enabled: !isLoading,
+    retry: 1,
+    meta: {
+      errorMessage: 'Failed to fetch users'
+    }
   });
 
-  const { data: transactions } = useQuery({
+  const { data: transactions, error: transactionsError } = useQuery({
     queryKey: ['admin-transactions'],
     queryFn: async () => {
       console.log('Fetching transactions...');
@@ -41,9 +45,13 @@ export const useAdminData = (isLoading: boolean) => {
     },
     enabled: !isLoading,
     refetchInterval: 5000,
+    retry: 1,
+    meta: {
+      errorMessage: 'Failed to fetch transactions'
+    }
   });
 
-  const { data: investments } = useQuery({
+  const { data: investments, error: investmentsError } = useQuery({
     queryKey: ['admin-investments'],
     queryFn: async () => {
       console.log('Fetching investments...');
@@ -59,7 +67,22 @@ export const useAdminData = (isLoading: boolean) => {
       return data as Investment[];
     },
     enabled: !isLoading,
+    retry: 1,
+    meta: {
+      errorMessage: 'Failed to fetch investments'
+    }
   });
+
+  // Show error toasts if any query fails
+  React.useEffect(() => {
+    if (usersError || transactionsError || investmentsError) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch admin data. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [usersError, transactionsError, investmentsError, toast]);
 
   const handleTransactionApproval = async (transaction: Transaction) => {
     try {
@@ -118,5 +141,6 @@ export const useAdminData = (isLoading: boolean) => {
     investments,
     handleTransactionApproval,
     handleTransactionRejection,
+    isError: !!(usersError || transactionsError || investmentsError),
   };
 };
