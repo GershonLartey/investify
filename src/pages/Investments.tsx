@@ -24,7 +24,7 @@ const Investments = () => {
     { amount: 5000, label: "₵5,000" },
   ];
 
-  const { data: userData, isLoading } = useQuery({
+  const { data: userData } = useQuery({
     queryKey: ["user-investments-data"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -133,10 +133,6 @@ const Investments = () => {
     createInvestmentMutation.mutate(amount);
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -151,23 +147,15 @@ const Investments = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <Card className="p-4">
-          <h3 className="text-lg font-semibold mb-2">Total Invested</h3>
-          <p className="text-2xl font-bold">
-            ₵{(userData?.investments?.reduce((sum, inv) => sum + inv.amount, 0) || 0).toFixed(2)}
-          </p>
-        </Card>
-        <Card className="p-4">
-          <h3 className="text-lg font-semibold mb-2">Expected Returns</h3>
-          <p className="text-2xl font-bold">
-            ₵{(userData?.investments?.reduce((sum, inv) => {
-              const daysRemaining = Math.ceil((new Date(inv.end_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-              return sum + (inv.amount * (inv.daily_interest / 100) * daysRemaining);
-            }, 0) || 0).toFixed(2)}
-          </p>
-        </Card>
-      </div>
+      <Card className="p-4">
+        <h3 className="text-lg font-semibold mb-2">Expected Returns</h3>
+        <p className="text-2xl font-bold">
+          ₵{(userData?.investments?.reduce((sum, inv) => {
+            const daysRemaining = Math.ceil((new Date(inv.end_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+            return sum + (inv.amount * (inv.daily_interest / 100) * daysRemaining);
+          }, 0) || 0).toFixed(2)}
+        </p>
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {packages.map((pkg, index) => (
