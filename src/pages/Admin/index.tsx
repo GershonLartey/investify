@@ -2,15 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import UserTable from "./components/UserTable";
-import TransactionTabs from "./components/TransactionTabs";
-import InvestmentTable from "./components/InvestmentTable";
-import WithdrawalSettings from "./components/WithdrawalSettings";
-import BroadcastNotification from "./components/BroadcastNotification";
-import AdminMetrics from "./components/AdminMetrics";
-import RecentActivity from "./components/RecentActivity";
 import { useAdminData } from "./hooks/useAdminData";
+import MetricsCard from "./components/MetricsCard";
+import TransactionList from "./components/TransactionList";
+import RevenueChart from "./components/RevenueChart";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -60,55 +55,64 @@ const Admin = () => {
     handleTransactionRejection,
   } = useAdminData(isLoading);
 
+  // Calculate total balance across all users
+  const totalBalance = users?.reduce((sum, user) => sum + (user.balance || 0), 0) || 0;
+
+  // Calculate total investments
+  const totalInvestments = investments?.reduce((sum, inv) => sum + inv.amount, 0) || 0;
+
+  // Calculate recent transaction total
+  const recentTransactionsTotal = transactions
+    ?.filter(t => t.status === 'approved')
+    ?.reduce((sum, t) => sum + t.amount, 0) || 0;
+
+  // Prepare data for revenue chart
+  const revenueData = transactions
+    ?.filter(t => t.status === 'approved')
+    ?.reduce((acc: any[], transaction) => {
+      const date = new Date(transaction.created_at).toLocaleDateString();
+      const existing = acc.find(item => item.name === date);
+      if (existing) {
+        existing.amount += transaction.amount;
+      } else {
+        acc.push({ name: date, amount: transaction.amount });
+      }
+      return acc;
+    }, [])
+    .slice(-7) || [];
+
   if (isLoading) {
     return <div className="p-4">Loading...</div>;
   }
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Admin Dashboard</h1>
       </div>
 
-      <AdminMetrics />
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <RecentActivity />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <MetricsCard
+          title="Total Balance"
+          value={totalBalance}
+          change={{ value: 15, type: "increase" }}
+        />
+        <MetricsCard
+          title="Total Investments"
+          value={totalInvestments}
+          change={{ value: 8, type: "increase" }}
+        />
+        <MetricsCard
+          title="Recent Transactions"
+          value={recentTransactionsTotal}
+          change={{ value: 12, type: "increase" }}
+        />
       </div>
-      
-      <Tabs defaultValue="users" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="transactions">Transactions</TabsTrigger>
-          <TabsTrigger value="investments">Investments</TabsTrigger>
-          <TabsTrigger value="withdrawal">Withdrawal Settings</TabsTrigger>
-          <TabsTrigger value="broadcast">Broadcast</TabsTrigger>
-        </TabsList>
 
-        <TabsContent value="users">
-          <UserTable users={users || []} />
-        </TabsContent>
-
-        <TabsContent value="transactions">
-          <TransactionTabs
-            transactions={transactions || []}
-            onApprove={handleTransactionApproval}
-            onReject={handleTransactionRejection}
-          />
-        </TabsContent>
-
-        <TabsContent value="investments">
-          <InvestmentTable investments={investments || []} />
-        </TabsContent>
-
-        <TabsContent value="withdrawal">
-          <WithdrawalSettings />
-        </TabsContent>
-
-        <TabsContent value="broadcast">
-          <BroadcastNotification />
-        </TabsContent>
-      </Tabs>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <RevenueChart data={revenueData} />
+        <TransactionList transactions={transactions || []} />
+      </div>
     </div>
   );
 };

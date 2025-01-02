@@ -19,13 +19,11 @@ export const useAdminData = (isLoading: boolean) => {
         console.error('Error fetching users:', error);
         throw error;
       }
-      console.log('Users fetched:', data);
       return data as User[];
     },
     enabled: !isLoading,
   });
 
-  // Fetch transactions with more frequent updates
   const { data: transactions } = useQuery({
     queryKey: ['admin-transactions'],
     queryFn: async () => {
@@ -39,14 +37,12 @@ export const useAdminData = (isLoading: boolean) => {
         console.error('Error fetching transactions:', error);
         throw error;
       }
-      console.log('Transactions fetched:', data);
       return data as Transaction[];
     },
     enabled: !isLoading,
-    refetchInterval: 5000, // Refetch every 5 seconds
+    refetchInterval: 5000,
   });
 
-  // Fetch investments
   const { data: investments } = useQuery({
     queryKey: ['admin-investments'],
     queryFn: async () => {
@@ -54,14 +50,12 @@ export const useAdminData = (isLoading: boolean) => {
       const { data, error } = await supabase
         .from('investments')
         .select('*')
-        .order('created_at', { ascending: false })
-        .limit(10);
+        .order('created_at', { ascending: false });
       
       if (error) {
         console.error('Error fetching investments:', error);
         throw error;
       }
-      console.log('Investments fetched:', data);
       return data as Investment[];
     },
     enabled: !isLoading,
@@ -69,7 +63,6 @@ export const useAdminData = (isLoading: boolean) => {
 
   const handleTransactionApproval = async (transaction: Transaction) => {
     try {
-      console.log('Approving transaction:', transaction.id);
       const { error } = await supabase
         .from('transactions')
         .update({ status: 'approved' })
@@ -96,7 +89,6 @@ export const useAdminData = (isLoading: boolean) => {
 
   const handleTransactionRejection = async (transaction: Transaction) => {
     try {
-      console.log('Rejecting transaction:', transaction.id);
       const { error } = await supabase
         .from('transactions')
         .update({ status: 'rejected' })
