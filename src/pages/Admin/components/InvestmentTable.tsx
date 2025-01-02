@@ -28,22 +28,33 @@ const InvestmentTable = ({ investments }: InvestmentTableProps) => {
         <TableHeader>
           <TableRow>
             <TableHead>Amount</TableHead>
-            <TableHead>Daily Interest</TableHead>
+            <TableHead>Daily Return</TableHead>
+            <TableHead>Total Return</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Start Date</TableHead>
             <TableHead>End Date</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {investments?.map((investment) => (
-            <TableRow key={investment.id}>
-              <TableCell>${investment.amount.toFixed(2)}</TableCell>
-              <TableCell>{investment.daily_interest}%</TableCell>
-              <TableCell className="capitalize">{investment.status}</TableCell>
-              <TableCell>{new Date(investment.start_date).toLocaleDateString()}</TableCell>
-              <TableCell>{new Date(investment.end_date).toLocaleDateString()}</TableCell>
-            </TableRow>
-          ))}
+          {investments?.map((investment) => {
+            const dailyReturn = investment.amount * (investment.daily_interest / 100);
+            const daysInvested = Math.ceil(
+              (new Date(investment.end_date).getTime() - new Date(investment.start_date).getTime()) / 
+              (1000 * 60 * 60 * 24)
+            );
+            const totalReturn = dailyReturn * daysInvested;
+
+            return (
+              <TableRow key={investment.id}>
+                <TableCell>₵{investment.amount.toFixed(2)}</TableCell>
+                <TableCell>₵{dailyReturn.toFixed(2)}</TableCell>
+                <TableCell>₵{totalReturn.toFixed(2)}</TableCell>
+                <TableCell className="capitalize">{investment.status}</TableCell>
+                <TableCell>{new Date(investment.start_date).toLocaleDateString()}</TableCell>
+                <TableCell>{new Date(investment.end_date).toLocaleDateString()}</TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>
