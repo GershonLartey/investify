@@ -10,13 +10,22 @@ import {
 } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ReloadIcon } from "@radix-ui/react-icons";
 
 const TransactionHistory = () => {
-  const { data: transactions, isLoading } = useQuery({
+  const { toast } = useToast();
+  
+  const { data: transactions, isLoading, error, refetch } = useQuery({
     queryKey: ['transactions-history'],
     queryFn: async () => {
+      console.log('Fetching transactions...');
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      if (!user) {
+        console.error('User not authenticated');
+        throw new Error("Not authenticated");
+      }
 
       const { data, error } = await supabase
         .from('transactions')
@@ -24,13 +33,57 @@ const TransactionHistory = () => {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching transactions:', error);
+        throw error;
+      }
+      
+      console.log('Transactions fetched successfully:', data);
       return data;
+    },
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    onError: (error: any) => {
+      console.error('Transaction fetch error:', error);
+      toast({
+        title: "Error fetching transactions",
+        description: "Please try again later",
+        variant: "destructive",
+      });
     },
   });
 
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold">Transaction History</h1>
+        <Alert variant="destructive">
+          <AlertDescription className="flex items-center justify-between">
+            Failed to load transactions.
+            <button 
+              onClick={() => refetch()} 
+              className="bg-destructive/10 text-destructive px-3 py-1 rounded-md hover:bg-destructive/20 transition-colors"
+            >
+              Try Again
+            </button>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold">Transaction History</h1>
+        <Card className="p-6">
+          <div className="flex items-center justify-center py-8">
+            <ReloadIcon className="h-6 w-6 animate-spin" />
+            <span className="ml-2">Loading transactions...</span>
+          </div>
+        </Card>
+      </div>
+    );
   }
 
   return (
