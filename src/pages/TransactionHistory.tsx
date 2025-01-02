@@ -12,7 +12,7 @@ import { Card } from "@/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ReloadIcon } from "@radix-ui/react-icons";
+import { RefreshCw } from "lucide-react";
 
 const TransactionHistory = () => {
   const { toast } = useToast();
@@ -43,14 +43,16 @@ const TransactionHistory = () => {
     },
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    onError: (error: any) => {
-      console.error('Transaction fetch error:', error);
-      toast({
-        title: "Error fetching transactions",
-        description: "Please try again later",
-        variant: "destructive",
-      });
-    },
+    meta: {
+      onError: (error: any) => {
+        console.error('Transaction fetch error:', error);
+        toast({
+          title: "Error fetching transactions",
+          description: "Please try again later",
+          variant: "destructive",
+        });
+      }
+    }
   });
 
   if (error) {
@@ -78,7 +80,7 @@ const TransactionHistory = () => {
         <h1 className="text-2xl font-bold">Transaction History</h1>
         <Card className="p-6">
           <div className="flex items-center justify-center py-8">
-            <ReloadIcon className="h-6 w-6 animate-spin" />
+            <RefreshCw className="h-6 w-6 animate-spin" />
             <span className="ml-2">Loading transactions...</span>
           </div>
         </Card>
