@@ -7,7 +7,7 @@ import MetricsCard from "./components/MetricsCard";
 import TransactionList from "./components/TransactionList";
 import RevenueChart from "./components/RevenueChart";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ReloadIcon } from "@lucide-react";
+import { ReloadIcon } from "lucide-react";
 
 const Admin = () => {
   const navigate = useNavigate();

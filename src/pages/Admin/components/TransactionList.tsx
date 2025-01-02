@@ -1,20 +1,15 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
-
-interface Transaction {
-  id: string;
-  type: string;
-  amount: number;
-  status: string;
-  created_at: string;
-}
+import { Transaction } from "../types";
 
 interface TransactionListProps {
   transactions: Transaction[];
+  onApprove: (transaction: Transaction) => Promise<void>;
+  onReject: (transaction: Transaction) => Promise<void>;
 }
 
-const TransactionList = ({ transactions }: TransactionListProps) => {
+const TransactionList = ({ transactions, onApprove, onReject }: TransactionListProps) => {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -27,6 +22,7 @@ const TransactionList = ({ transactions }: TransactionListProps) => {
             <TableHead>Amount</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Time</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -44,6 +40,24 @@ const TransactionList = ({ transactions }: TransactionListProps) => {
               </TableCell>
               <TableCell className="text-muted-foreground">
                 {formatDistanceToNow(new Date(transaction.created_at), { addSuffix: true })}
+              </TableCell>
+              <TableCell>
+                {transaction.status === 'pending' && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => onApprove(transaction)}
+                      className="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => onReject(transaction)}
+                      className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                )}
               </TableCell>
             </TableRow>
           ))}
