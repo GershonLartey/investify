@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useAdminData } from "./hooks/useAdminData";
-import AdminHeader from "./components/AdminHeader";
-import TransactionTabs from "./components/TransactionTabs";
-import InvestmentOverview from "./components/InvestmentOverview";
-import UserOverview from "./components/UserOverview";
+import { useAdminData } from "./Admin/hooks/useAdminData";
+import AdminHeader from "./Admin/components/AdminHeader";
+import TransactionTabs from "./Admin/components/TransactionTabs";
+import InvestmentOverview from "./Admin/components/InvestmentOverview";
+import UserOverview from "./Admin/components/UserOverview";
 import { Loader } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
