@@ -5,6 +5,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import Navigation from "./components/Navigation";
 import TidioChat from "./components/TidioChat";
 import Home from "./pages/Home";
@@ -22,21 +23,42 @@ const queryClient = new QueryClient();
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Check current session
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error("Error getting session:", error);
+        toast({
+          title: "Session Error",
+          description: "Please log in again",
+          variant: "destructive",
+        });
+      }
       setSession(session);
       setLoading(false);
     });
 
+    // Set up real-time subscription to auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      console.log("Auth state changed:", _event);
+      if (_event === 'TOKEN_REFRESHED') {
+        console.log('Token refreshed successfully');
+      }
+      if (_event === 'SIGNED_OUT') {
+        // Clear any cached data
+        queryClient.clear();
+      }
       setSession(session);
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [toast]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -51,20 +73,30 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
 
 const App = () => {
   const [session, setSession] = useState<any>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error("Error getting session:", error);
+        toast({
+          title: "Session Error",
+          description: "Please log in again",
+          variant: "destructive",
+        });
+      }
       setSession(session);
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("Auth state changed in App:", _event);
       setSession(session);
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [toast]);
 
   return (
     <React.StrictMode>
