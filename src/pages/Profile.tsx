@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import ReferralSection from "@/components/ReferralSection";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -38,6 +41,24 @@ const Profile = () => {
     fetchProfile();
   }, [toast]);
 
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate('/');
+      toast({
+        title: "Success",
+        description: "You have been signed out successfully",
+      });
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return <div>Loading profile...</div>;
   }
@@ -59,11 +80,28 @@ const Profile = () => {
             <div className="space-y-2">
               <p><strong>Email:</strong> {profile.email}</p>
               <p><strong>Balance:</strong> ₵{profile.balance?.toFixed(2) || '0.00'}</p>
+              <Button 
+                variant="destructive" 
+                onClick={handleSignOut}
+                className="mt-4"
+              >
+                Sign Out
+              </Button>
             </div>
           </CardContent>
         </Card>
 
         <ReferralSection />
+
+        <Card className="p-6">
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={() => navigate('/transactions')}
+          >
+            View Transaction History
+          </Button>
+        </Card>
       </div>
     </div>
   );

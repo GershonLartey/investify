@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Copy } from "lucide-react";
 
 const Dashboard = () => {
   const { toast } = useToast();
@@ -93,25 +92,6 @@ const Dashboard = () => {
     retry: false,
   });
 
-  const copyReferralCode = async () => {
-    if (profile?.referral_code) {
-      try {
-        await navigator.clipboard.writeText(profile.referral_code);
-        toast({
-          title: "Copied!",
-          description: "Referral code copied to clipboard",
-        });
-      } catch (error) {
-        console.error('Error copying referral code:', error);
-        toast({
-          title: "Error",
-          description: "Failed to copy referral code",
-          variant: "destructive",
-        });
-      }
-    }
-  };
-
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
@@ -129,7 +109,7 @@ const Dashboard = () => {
         <Card className="p-6">
           <h3 className="text-sm font-medium text-gray-500">Total Balance</h3>
           <p className="text-2xl font-bold text-gray-900">
-            ${profile?.balance?.toFixed(2) || '0.00'}
+            ₵{profile?.balance?.toFixed(2) || '0.00'}
           </p>
         </Card>
         <Card className="p-6">
@@ -140,27 +120,9 @@ const Dashboard = () => {
         </Card>
         <Card className="p-6">
           <h3 className="text-sm font-medium text-gray-500">Total Returns</h3>
-          <p className="text-2xl font-bold text-gray-900">$0.00</p>
+          <p className="text-2xl font-bold text-gray-900">₵0.00</p>
         </Card>
       </div>
-
-      {/* Referral Code Section */}
-      <Card className="p-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h3 className="text-lg font-medium text-gray-900">Your Referral Code</h3>
-            <p className="text-gray-500">Share this code with friends to earn rewards</p>
-          </div>
-          <Button
-            onClick={copyReferralCode}
-            className="flex items-center gap-2"
-            variant="outline"
-          >
-            <span>{profile?.referral_code || 'Loading...'}</span>
-            <Copy className="h-4 w-4" />
-          </Button>
-        </div>
-      </Card>
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -179,7 +141,12 @@ const Dashboard = () => {
       </div>
 
       <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Recent Transactions</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Recent Transactions</h2>
+          <Link to="/transactions">
+            <Button variant="outline">View All</Button>
+          </Link>
+        </div>
         {transactions && transactions.length > 0 ? (
           <div className="space-y-4">
             {transactions.map((transaction) => (
@@ -194,7 +161,7 @@ const Dashboard = () => {
                   <p className={`font-medium ${
                     transaction.type === 'deposit' ? 'text-green-600' : 'text-red-600'
                   }`}>
-                    {transaction.type === 'deposit' ? '+' : '-'}${transaction.amount.toFixed(2)}
+                    {transaction.type === 'deposit' ? '+' : '-'}₵{transaction.amount.toFixed(2)}
                   </p>
                   <p className="text-sm text-gray-500 capitalize">{transaction.status}</p>
                 </div>
