@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Copy } from "lucide-react";
 
 const Dashboard = () => {
   const { toast } = useToast();
@@ -86,6 +88,16 @@ const Dashboard = () => {
     retry: false,
   });
 
+  const copyReferralCode = async () => {
+    if (profile?.referral_code) {
+      await navigator.clipboard.writeText(profile.referral_code);
+      toast({
+        title: "Copied!",
+        description: "Referral code copied to clipboard",
+      });
+    }
+  };
+
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
@@ -117,6 +129,24 @@ const Dashboard = () => {
           <p className="text-2xl font-bold text-gray-900">$0.00</p>
         </Card>
       </div>
+
+      {/* Referral Code Section */}
+      <Card className="p-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-medium text-gray-900">Your Referral Code</h3>
+            <p className="text-gray-500">Share this code with friends to earn rewards</p>
+          </div>
+          <Button
+            onClick={copyReferralCode}
+            className="flex items-center gap-2"
+            variant="outline"
+          >
+            <span>{profile?.referral_code || 'Loading...'}</span>
+            <Copy className="h-4 w-4" />
+          </Button>
+        </div>
+      </Card>
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
