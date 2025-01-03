@@ -13,10 +13,10 @@ const ReferralSection = () => {
   useEffect(() => {
     const fetchReferralCode = async () => {
       try {
-        console.log('Fetching user data...');
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
           console.log('No user found');
+          setLoading(false);
           return;
         }
 
@@ -25,10 +25,15 @@ const ReferralSection = () => {
           .from('profiles')
           .select('referral_code')
           .eq('id', user.id)
-          .maybeSingle();
+          .single();
 
         if (error) {
           console.error('Error fetching referral code:', error);
+          toast({
+            title: "Error",
+            description: "Failed to fetch referral code",
+            variant: "destructive",
+          });
           throw error;
         }
         
@@ -44,7 +49,7 @@ const ReferralSection = () => {
     };
 
     fetchReferralCode();
-  }, []);
+  }, [toast]);
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -64,7 +69,15 @@ const ReferralSection = () => {
   };
 
   if (loading) {
-    return <div>Loading referral information...</div>;
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center">
+            <span>Loading referral information...</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

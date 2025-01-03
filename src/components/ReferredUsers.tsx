@@ -17,8 +17,12 @@ const ReferredUsers = () => {
     const fetchReferredUsers = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        if (!user) {
+          setLoading(false);
+          return;
+        }
 
+        // First get the user's referral code
         const { data: profile } = await supabase
           .from('profiles')
           .select('referral_code')
@@ -26,12 +30,17 @@ const ReferredUsers = () => {
           .single();
 
         if (profile?.referral_code) {
+          // Then get all users who used this referral code
           const { data, error } = await supabase
             .from('profiles')
             .select('id, username, created_at')
             .eq('referred_by', profile.referral_code);
 
-          if (error) throw error;
+          if (error) {
+            console.error('Error fetching referred users:', error);
+            throw error;
+          }
+          
           setReferredUsers(data || []);
         }
       } catch (error) {
@@ -45,7 +54,15 @@ const ReferredUsers = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading referred users...</div>;
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center">
+            <span>Loading referred users...</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

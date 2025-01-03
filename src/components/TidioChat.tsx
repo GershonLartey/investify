@@ -8,8 +8,23 @@ const TidioChat = () => {
     script.async = true;
     document.body.appendChild(script);
 
+    // Configure Tidio position
+    const configureTidio = () => {
+      if (window.tidioChatApi) {
+        window.tidioChatApi.on("ready", function() {
+          const iframe = document.querySelector('iframe[src*="tidio"]');
+          if (iframe) {
+            iframe.style.bottom = "80px"; // Move it up to avoid navbar
+          }
+        });
+      } else {
+        setTimeout(configureTidio, 100);
+      }
+    };
+
+    configureTidio();
+
     return () => {
-      // Cleanup
       document.body.removeChild(script);
     };
   }, []);
