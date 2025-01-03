@@ -13,16 +13,18 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Initialize auth and handle session changes
+    console.log('Setting up auth session...');
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setIsLoading(false);
+      console.log('Session loaded:', session?.user?.id);
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      console.log('Auth state changed:', session?.user?.id);
     });
 
     return () => subscription.unsubscribe();
@@ -31,17 +33,20 @@ const Dashboard = () => {
   const { data: profile } = useQuery({
     queryKey: ['profile', session?.user?.id],
     queryFn: async () => {
+      console.log('Fetching profile for user:', session?.user?.id);
       if (!session?.user?.id) return null;
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', session.user.id)
-        .maybeSingle();
+        .single();
       
       if (error) {
         console.error('Error fetching profile:', error);
         throw error;
       }
+      console.log('Profile data:', data);
       return data;
     },
     enabled: !!session?.user?.id && !isLoading,
@@ -90,11 +95,20 @@ const Dashboard = () => {
 
   const copyReferralCode = async () => {
     if (profile?.referral_code) {
-      await navigator.clipboard.writeText(profile.referral_code);
-      toast({
-        title: "Copied!",
-        description: "Referral code copied to clipboard",
-      });
+      try {
+        await navigator.clipboard.writeText(profile.referral_code);
+        toast({
+          title: "Copied!",
+          description: "Referral code copied to clipboard",
+        });
+      } catch (error) {
+        console.error('Error copying referral code:', error);
+        toast({
+          title: "Error",
+          description: "Failed to copy referral code",
+          variant: "destructive",
+        });
+      }
     }
   };
 
