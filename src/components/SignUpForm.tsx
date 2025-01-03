@@ -1,53 +1,60 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 const SignUpForm = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
+  const [referralCode, setReferralCode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: {
-            username: username,
-          },
-        },
       });
 
-      if (error) throw error;
+      if (signUpError) throw signUpError;
 
-      if (data.user) {
-        // Create profile with username
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .update({ username })
-          .eq("id", data.user.id);
+      if (signUpData.user) {
+        // Update profile with referral code if provided
+        if (referralCode) {
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ referred_by: referralCode })
+            .eq('id', signUpData.user.id);
 
-        if (profileError) throw profileError;
+          if (updateError) {
+            console.error('Error updating referral:', updateError);
+            toast({
+              title: "Warning",
+              description: "Account created but referral code could not be applied",
+              variant: "destructive",
+            });
+          }
+        }
 
         toast({
-          title: "Success!",
-          description: "Please check your email to verify your account",
+          title: "Success",
+          description: "Account created successfully! Please verify your email.",
         });
+        
         navigate("/dashboard");
       }
     } catch (error: any) {
+      console.error('Signup error:', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "An error occurred during sign up",
         variant: "destructive",
       });
     } finally {
@@ -56,16 +63,7 @@ const SignUpForm = () => {
   };
 
   return (
-    <form onSubmit={handleSignUp} className="space-y-4">
-      <div>
-        <Input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-      </div>
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <Input
           type="email"
@@ -84,8 +82,16 @@ const SignUpForm = () => {
           required
         />
       </div>
+      <div>
+        <Input
+          type="text"
+          placeholder="Referral Code (Optional)"
+          value={referralCode}
+          onChange={(e) => setReferralCode(e.target.value)}
+        />
+      </div>
       <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? "Loading..." : "Sign Up"}
+        {loading ? "Creating Account..." : "Sign Up"}
       </Button>
     </form>
   );
