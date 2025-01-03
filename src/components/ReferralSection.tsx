@@ -13,19 +13,31 @@ const ReferralSection = () => {
   useEffect(() => {
     const fetchReferralCode = async () => {
       try {
+        console.log('Fetching user data...');
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        if (!user) {
+          console.log('No user found');
+          return;
+        }
 
+        console.log('Fetching referral code for user:', user.id);
         const { data, error } = await supabase
           .from('profiles')
           .select('referral_code')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
 
-        if (error) throw error;
-        if (data) setReferralCode(data.referral_code);
+        if (error) {
+          console.error('Error fetching referral code:', error);
+          throw error;
+        }
+        
+        if (data) {
+          console.log('Referral code found:', data.referral_code);
+          setReferralCode(data.referral_code || '');
+        }
       } catch (error) {
-        console.error('Error fetching referral code:', error);
+        console.error('Error in fetchReferralCode:', error);
       } finally {
         setLoading(false);
       }
