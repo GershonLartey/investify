@@ -37,19 +37,6 @@ const Transactions = () => {
 
       if (error) throw error
 
-      // Update user balance
-      if (transaction.type === 'deposit') {
-        await supabase.rpc('update_user_balance', {
-          user_id: transaction.user_id,
-          amount: transaction.amount
-        })
-      } else if (transaction.type === 'withdrawal') {
-        await supabase.rpc('update_user_balance', {
-          user_id: transaction.user_id,
-          amount: -transaction.amount
-        })
-      }
-
       toast({
         title: "Success",
         description: "Transaction approved successfully",

@@ -1,147 +1,80 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { supabase } from "@/integrations/supabase/client"
+import { useToast } from "@/hooks/use-toast"
 
 const SignUpForm = () => {
-  const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [referralCode, setReferralCode] = useState("");
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  const navigate = useNavigate()
+  const { toast } = useToast()
+  const [username, setUsername] = useState("")
+  const [phoneNumber, setPhoneNumber] = useState("")
+  const [user, setUser] = useState<any>(null)
+
+  useEffect(() => {
+    const session = supabase.auth.getSession()
+    setUser(session?.user ?? null)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
+    e.preventDefault()
+    
     try {
-      // Validate passwords match
-      if (password !== confirmPassword) {
-        throw new Error("Passwords do not match");
-      }
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .insert({
+          id: user?.id,
+          username,
+          phone_number: phoneNumber,
+          avatar_url: null,
+        })
+        .select()
+        .single()
 
-      // Validate phone number format (simple validation)
-      if (!/^\d{10}$/.test(phoneNumber)) {
-        throw new Error("Please enter a valid 10-digit phone number");
-      }
+      if (error) throw error
 
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            username,
-            phone_number: phoneNumber,
-          }
-        }
-      });
+      toast({
+        title: "Profile created",
+        description: "Your profile has been created successfully.",
+      })
 
-      if (signUpError) throw signUpError;
-
-      if (signUpData.user) {
-        // Update profile with referral code if provided
-        if (referralCode) {
-          const { error: updateError } = await supabase
-            .from('profiles')
-            .update({ referred_by: referralCode })
-            .eq('id', signUpData.user.id);
-
-          if (updateError) {
-            console.error('Error updating referral:', updateError);
-            toast({
-              title: "Warning",
-              description: "Account created but referral code could not be applied",
-              variant: "destructive",
-            });
-          }
-        }
-
-        toast({
-          title: "Success",
-          description: "Account created successfully! Please verify your email.",
-        });
-        
-        navigate("/dashboard");
-      }
-    } catch (error: any) {
-      console.error('Signup error:', error);
+      navigate("/dashboard")
+    } catch (error) {
+      console.error('Error creating profile:', error)
       toast({
         title: "Error",
-        description: error.message || "An error occurred during sign up",
+        description: "Failed to create profile. Please try again.",
         variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+      })
     }
-  };
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Input
+        <label htmlFor="username" className="block text-sm font-medium">Username</label>
+        <input
           type="text"
-          placeholder="Username"
+          id="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
+          className="mt-1 block w-full border border-gray-300 rounded-md p-2"
         />
       </div>
       <div>
-        <Input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <Input
+        <label htmlFor="phoneNumber" className="block text-sm font-medium">Phone Number</label>
+        <input
           type="tel"
-          placeholder="Phone Number (10 digits)"
+          id="phoneNumber"
           value={phoneNumber}
           onChange={(e) => setPhoneNumber(e.target.value)}
           required
-          pattern="\d{10}"
+          className="mt-1 block w-full border border-gray-300 rounded-md p-2"
         />
       </div>
-      <div>
-        <Input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <Input
-          type="password"
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <Input
-          type="text"
-          placeholder="Referral Code (Optional)"
-          value={referralCode}
-          onChange={(e) => setReferralCode(e.target.value)}
-        />
-      </div>
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? "Creating Account..." : "Sign Up"}
-      </Button>
+      <button type="submit" className="w-full bg-blue-500 text-white rounded-md p-2">Sign Up</button>
     </form>
-  );
-};
+  )
+}
 
-export default SignUpForm;
+export default SignUpForm
