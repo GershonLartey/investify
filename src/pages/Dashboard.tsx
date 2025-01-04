@@ -29,7 +29,7 @@ const Dashboard = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const { data: profile } = useQuery({
+  const { data: profile, isError: profileError } = useQuery({
     queryKey: ['profile', session?.user?.id],
     queryFn: async () => {
       console.log('Fetching profile for user:', session?.user?.id);
@@ -43,12 +43,17 @@ const Dashboard = () => {
       
       if (error) {
         console.error('Error fetching profile:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load profile data",
+          variant: "destructive",
+        });
         throw error;
       }
-      console.log('Profile data:', data);
       return data;
     },
     enabled: !!session?.user?.id && !isLoading,
+    retry: 1,
   });
 
   const { data: transactions } = useQuery({
@@ -64,17 +69,23 @@ const Dashboard = () => {
       
       if (error) {
         console.error('Error fetching transactions:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load transactions",
+          variant: "destructive",
+        });
         throw error;
       }
       return data || [];
     },
     enabled: !!session?.user?.id && !isLoading,
-    retry: false,
+    retry: 1,
   });
 
   const { data: activeInvestments } = useQuery({
     queryKey: ['active-investments', session?.user?.id],
     queryFn: async () => {
+      console.log('Fetching active investments...');
       if (!session?.user?.id) return [];
       const { data, error } = await supabase
         .from('investments')
@@ -84,12 +95,18 @@ const Dashboard = () => {
       
       if (error) {
         console.error('Error fetching investments:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load investments",
+          variant: "destructive",
+        });
         throw error;
       }
+      console.log('Active investments:', data);
       return data || [];
     },
     enabled: !!session?.user?.id && !isLoading,
-    retry: false,
+    retry: 1,
   });
 
   if (isLoading) {

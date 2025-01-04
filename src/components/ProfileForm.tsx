@@ -19,11 +19,21 @@ const ProfileForm = () => {
 
         setEmail(user.email || "");
 
-        const { data: profile } = await supabase
+        const { data: profile, error } = await supabase
           .from('profiles')
           .select('username')
           .eq('id', user.id)
           .single();
+
+        if (error) {
+          console.error('Error fetching profile:', error);
+          toast({
+            title: "Error",
+            description: "Failed to load profile",
+            variant: "destructive",
+          });
+          throw error;
+        }
 
         if (profile) {
           setUsername(profile.username || "");
@@ -34,7 +44,7 @@ const ProfileForm = () => {
     };
 
     fetchProfile();
-  }, []);
+  }, [toast]);
 
   const handleUpdateProfile = async () => {
     try {
@@ -46,7 +56,15 @@ const ProfileForm = () => {
         .update({ username })
         .eq('id', user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating profile:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update profile",
+          variant: "destructive",
+        });
+        throw error;
+      }
 
       setIsEditing(false);
       toast({
@@ -55,11 +73,6 @@ const ProfileForm = () => {
       });
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update profile",
-        variant: "destructive",
-      });
     }
   };
 

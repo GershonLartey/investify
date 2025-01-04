@@ -23,7 +23,7 @@ const ReferralSection = () => {
         console.log('Fetching referral code for user:', user.id);
         const { data, error } = await supabase
           .from('profiles')
-          .select('referral_code')
+          .select('phone_number')
           .eq('id', user.id)
           .single();
 
@@ -38,8 +38,8 @@ const ReferralSection = () => {
         }
         
         if (data) {
-          console.log('Referral code found:', data.referral_code);
-          setReferralCode(data.referral_code || '');
+          console.log('Phone number found:', data.phone_number);
+          setReferralCode(data.phone_number || '');
         }
       } catch (error) {
         console.error('Error in fetchReferralCode:', error);
