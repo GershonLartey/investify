@@ -8,21 +8,29 @@ const SignUpForm = () => {
   const { toast } = useToast()
   const [username, setUsername] = useState("")
   const [phoneNumber, setPhoneNumber] = useState("")
-  const [user, setUser] = useState<any>(null)
+  const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
-    const session = supabase.auth.getSession()
-    setUser(session?.user ?? null)
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      setUserId(session?.user?.id ?? null)
+    }
+    getSession()
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    if (!userId) {
+      console.error('No user ID found')
+      return
+    }
+
     try {
       const { data: profile, error } = await supabase
         .from('profiles')
         .insert({
-          id: user?.id,
+          id: userId,
           username,
           phone_number: phoneNumber,
           avatar_url: null,
