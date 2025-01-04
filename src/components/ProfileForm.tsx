@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { UserRound, Mail, Edit2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 const ProfileForm = () => {
   const [username, setUsername] = useState("");
@@ -11,50 +12,62 @@ const ProfileForm = () => {
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
 
+  // Get current user session
+  const [userId, setUserId] = useState<string | null>(null);
+
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
         setEmail(user.email || "");
-
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('username')
-          .eq('id', user.id)
-          .single();
-
-        if (error) {
-          console.error('Error fetching profile:', error);
-          toast({
-            title: "Error",
-            description: "Failed to load profile",
-            variant: "destructive",
-          });
-          throw error;
-        }
-
-        if (profile) {
-          setUsername(profile.username || "");
-        }
-      } catch (error) {
-        console.error('Error fetching profile:', error);
       }
     };
+    fetchUser();
+  }, []);
 
-    fetchProfile();
-  }, [toast]);
+  // Fetch profile data using React Query
+  const { data: profile } = useQuery({
+    queryKey: ['profile', userId],
+    queryFn: async () => {
+      console.log('Fetching profile data for user:', userId);
+      if (!userId) return null;
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load profile data",
+          variant: "destructive",
+        });
+        throw error;
+      }
+
+      return data;
+    },
+    enabled: !!userId,
+    retry: 1,
+    onSuccess: (data) => {
+      if (data) {
+        setUsername(data.username || "");
+      }
+    },
+  });
 
   const handleUpdateProfile = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+    if (!userId) return;
 
+    try {
       const { error } = await supabase
         .from('profiles')
         .update({ username })
-        .eq('id', user.id);
+        .eq('id', userId);
 
       if (error) {
         console.error('Error updating profile:', error);
