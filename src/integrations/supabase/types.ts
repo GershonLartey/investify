@@ -103,6 +103,7 @@ export type Database = {
           balance: number | null
           created_at: string
           id: string
+          phone_number: string | null
           referral_code: string | null
           referred_by: string | null
           updated_at: string
@@ -113,6 +114,7 @@ export type Database = {
           balance?: number | null
           created_at?: string
           id: string
+          phone_number?: string | null
           referral_code?: string | null
           referred_by?: string | null
           updated_at?: string
@@ -123,6 +125,7 @@ export type Database = {
           balance?: number | null
           created_at?: string
           id?: string
+          phone_number?: string | null
           referral_code?: string | null
           referred_by?: string | null
           updated_at?: string

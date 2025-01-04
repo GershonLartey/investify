@@ -7,7 +7,10 @@ import { useToast } from "@/hooks/use-toast";
 
 const SignUpForm = () => {
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [referralCode, setReferralCode] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -18,9 +21,25 @@ const SignUpForm = () => {
     setLoading(true);
 
     try {
+      // Validate passwords match
+      if (password !== confirmPassword) {
+        throw new Error("Passwords do not match");
+      }
+
+      // Validate phone number format (simple validation)
+      if (!/^\d{10}$/.test(phoneNumber)) {
+        throw new Error("Please enter a valid 10-digit phone number");
+      }
+
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            username,
+            phone_number: phoneNumber,
+          }
+        }
       });
 
       if (signUpError) throw signUpError;
@@ -66,6 +85,15 @@ const SignUpForm = () => {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <Input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <Input
           type="email"
           placeholder="Email"
           value={email}
@@ -75,10 +103,29 @@ const SignUpForm = () => {
       </div>
       <div>
         <Input
+          type="tel"
+          placeholder="Phone Number (10 digits)"
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
+          required
+          pattern="\d{10}"
+        />
+      </div>
+      <div>
+        <Input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <Input
+          type="password"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
           required
         />
       </div>
