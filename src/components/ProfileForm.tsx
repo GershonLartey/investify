@@ -10,10 +10,8 @@ const ProfileForm = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [isEditing, setIsEditing] = useState(false);
-  const { toast } = useToast();
-
-  // Get current user session
   const [userId, setUserId] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -26,7 +24,6 @@ const ProfileForm = () => {
     fetchUser();
   }, []);
 
-  // Fetch profile data using React Query
   const { data: profile } = useQuery({
     queryKey: ['profile', userId],
     queryFn: async () => {
@@ -49,15 +46,13 @@ const ProfileForm = () => {
         throw error;
       }
 
-      return data;
-    },
-    enabled: !!userId,
-    retry: 1,
-    onSuccess: (data) => {
       if (data) {
         setUsername(data.username || "");
       }
+      return data;
     },
+    enabled: !!userId,
+    retry: 1
   });
 
   const handleUpdateProfile = async () => {

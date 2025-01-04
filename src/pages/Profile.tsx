@@ -2,8 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import ReferralSection from "@/components/ReferralSection";
-import ReferredUsers from "@/components/ReferredUsers";
 import ProfileForm from "@/components/ProfileForm";
 
 const Profile = () => {
@@ -34,8 +32,6 @@ const Profile = () => {
       
       <div className="grid gap-6">
         <ProfileForm />
-        <ReferralSection />
-        <ReferredUsers />
 
         <div className="flex gap-4">
           <Button 
