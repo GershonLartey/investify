@@ -5,6 +5,8 @@ import { useToast } from "@/hooks/use-toast"
 import { useAdminData } from "./hooks/useAdminData"
 import { AdminSidebar } from "@/components/admin/AdminSidebar"
 import { SidebarProvider } from "@/components/ui/sidebar"
+import Navigation from "@/components/Navigation"
+import TidioChat from "@/components/TidioChat"
 import MetricsCard from "./components/MetricsCard"
 import TransactionList from "./components/TransactionList"
 import RevenueChart from "./components/RevenueChart"
@@ -104,39 +106,47 @@ const Admin = () => {
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <AdminSidebar />
-        <div className="flex-1 p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <MetricsCard
-              title="Total Balance"
-              value={totalBalance}
-              change={{ value: 15, type: "increase" }}
-            />
-            <MetricsCard
-              title="Total Investments"
-              value={totalInvestments}
-              change={{ value: 8, type: "increase" }}
-            />
-            <MetricsCard
-              title="Recent Transactions"
-              value={recentTransactionsTotal}
-              change={{ value: 12, type: "increase" }}
-            />
-          </div>
+    <>
+      <TidioChat />
+      <div className="min-h-screen flex flex-col">
+        <Navigation />
+        <div className="flex-1 flex">
+          <SidebarProvider>
+            <div className="flex min-h-[calc(100vh-4rem)] w-full">
+              <AdminSidebar />
+              <div className="flex-1 p-6 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <MetricsCard
+                    title="Total Balance"
+                    value={totalBalance}
+                    change={{ value: 15, type: "increase" }}
+                  />
+                  <MetricsCard
+                    title="Total Investments"
+                    value={totalInvestments}
+                    change={{ value: 8, type: "increase" }}
+                  />
+                  <MetricsCard
+                    title="Recent Transactions"
+                    value={recentTransactionsTotal}
+                    change={{ value: 12, type: "increase" }}
+                  />
+                </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <RevenueChart data={revenueData} />
-            <TransactionList 
-              transactions={transactions || []} 
-              onApprove={handleTransactionApproval}
-              onReject={handleTransactionRejection}
-            />
-          </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <RevenueChart data={revenueData} />
+                  <TransactionList 
+                    transactions={transactions || []} 
+                    onApprove={handleTransactionApproval}
+                    onReject={handleTransactionRejection}
+                  />
+                </div>
+              </div>
+            </div>
+          </SidebarProvider>
         </div>
       </div>
-    </SidebarProvider>
+    </>
   )
 }
 
