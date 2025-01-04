@@ -1,88 +1,147 @@
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { supabase } from "@/integrations/supabase/client"
-import { useToast } from "@/hooks/use-toast"
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 const SignUpForm = () => {
-  const navigate = useNavigate()
-  const { toast } = useToast()
-  const [username, setUsername] = useState("")
-  const [phoneNumber, setPhoneNumber] = useState("")
-  const [userId, setUserId] = useState<string | null>(null)
-
-  useEffect(() => {
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setUserId(session?.user?.id ?? null)
-    }
-    getSession()
-  }, [])
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [referralCode, setReferralCode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!userId) {
-      console.error('No user ID found')
-      return
-    }
+    e.preventDefault();
+    setLoading(true);
 
     try {
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .insert({
-          id: userId,
-          username,
-          phone_number: phoneNumber,
-          avatar_url: null,
-        })
-        .select()
-        .single()
+      // Validate passwords match
+      if (password !== confirmPassword) {
+        throw new Error("Passwords do not match");
+      }
 
-      if (error) throw error
+      // Validate phone number format (simple validation)
+      if (!/^\d{10}$/.test(phoneNumber)) {
+        throw new Error("Please enter a valid 10-digit phone number");
+      }
 
-      toast({
-        title: "Profile created",
-        description: "Your profile has been created successfully.",
-      })
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username,
+            phone_number: phoneNumber,
+          }
+        }
+      });
 
-      navigate("/dashboard")
-    } catch (error) {
-      console.error('Error creating profile:', error)
+      if (signUpError) throw signUpError;
+
+      if (signUpData.user) {
+        // Update profile with referral code if provided
+        if (referralCode) {
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ referred_by: referralCode })
+            .eq('id', signUpData.user.id);
+
+          if (updateError) {
+            console.error('Error updating referral:', updateError);
+            toast({
+              title: "Warning",
+              description: "Account created but referral code could not be applied",
+              variant: "destructive",
+            });
+          }
+        }
+
+        toast({
+          title: "Success",
+          description: "Account created successfully! Please verify your email.",
+        });
+        
+        navigate("/dashboard");
+      }
+    } catch (error: any) {
+      console.error('Signup error:', error);
       toast({
         title: "Error",
-        description: "Failed to create profile. Please try again.",
+        description: error.message || "An error occurred during sign up",
         variant: "destructive",
-      })
+      });
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="username" className="block text-sm font-medium">Username</label>
-        <input
+        <Input
           type="text"
-          id="username"
+          placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
-          className="mt-1 block w-full border border-gray-300 rounded-md p-2"
         />
       </div>
       <div>
-        <label htmlFor="phoneNumber" className="block text-sm font-medium">Phone Number</label>
-        <input
+        <Input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <Input
           type="tel"
-          id="phoneNumber"
+          placeholder="Phone Number (10 digits)"
           value={phoneNumber}
           onChange={(e) => setPhoneNumber(e.target.value)}
           required
-          className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+          pattern="\d{10}"
         />
       </div>
-      <button type="submit" className="w-full bg-blue-500 text-white rounded-md p-2">Sign Up</button>
+      <div>
+        <Input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <Input
+          type="password"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <Input
+          type="text"
+          placeholder="Referral Code (Optional)"
+          value={referralCode}
+          onChange={(e) => setReferralCode(e.target.value)}
+        />
+      </div>
+      <Button type="submit" className="w-full" disabled={loading}>
+        {loading ? "Creating Account..." : "Sign Up"}
+      </Button>
     </form>
-  )
-}
+  );
+};
 
-export default SignUpForm
+export default SignUpForm;
