@@ -11,7 +11,6 @@ const SignUpForm = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [referralCode, setReferralCode] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -45,23 +44,6 @@ const SignUpForm = () => {
       if (signUpError) throw signUpError;
 
       if (signUpData.user) {
-        // Update profile with referral code if provided
-        if (referralCode) {
-          const { error: updateError } = await supabase
-            .from('profiles')
-            .update({ referred_by: referralCode })
-            .eq('id', signUpData.user.id);
-
-          if (updateError) {
-            console.error('Error updating referral:', updateError);
-            toast({
-              title: "Warning",
-              description: "Account created but referral code could not be applied",
-              variant: "destructive",
-            });
-          }
-        }
-
         toast({
           title: "Success",
           description: "Account created successfully! Please verify your email.",
@@ -127,14 +109,6 @@ const SignUpForm = () => {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
-        />
-      </div>
-      <div>
-        <Input
-          type="text"
-          placeholder="Referral Code (Optional)"
-          value={referralCode}
-          onChange={(e) => setReferralCode(e.target.value)}
         />
       </div>
       <Button type="submit" className="w-full" disabled={loading}>
