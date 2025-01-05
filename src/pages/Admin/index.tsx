@@ -3,11 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAdminData } from "./hooks/useAdminData";
-import MetricsCard from "./components/MetricsCard";
-import TransactionList from "./components/TransactionList";
-import RevenueChart from "./components/RevenueChart";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import AdminHeader from "./components/AdminHeader";
+import TransactionTabs from "./components/TransactionTabs";
+import InvestmentOverview from "./components/InvestmentOverview";
+import UserOverview from "./components/UserOverview";
+import WithdrawalSettings from "./components/WithdrawalSettings";
+import BroadcastNotification from "./components/BroadcastNotification";
 import { Loader } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -59,28 +63,6 @@ const Admin = () => {
     isError,
   } = useAdminData(isLoading);
 
-  // Calculate metrics
-  const totalBalance = users?.reduce((sum, user) => sum + (user.balance || 0), 0) || 0;
-  const totalInvestments = investments?.reduce((sum, inv) => sum + inv.amount, 0) || 0;
-  const recentTransactionsTotal = transactions
-    ?.filter(t => t.status === 'approved')
-    ?.reduce((sum, t) => sum + t.amount, 0) || 0;
-
-  // Prepare data for revenue chart
-  const revenueData = transactions
-    ?.filter(t => t.status === 'approved')
-    ?.reduce((acc: any[], transaction) => {
-      const date = new Date(transaction.created_at).toLocaleDateString();
-      const existing = acc.find(item => item.name === date);
-      if (existing) {
-        existing.amount += transaction.amount;
-      } else {
-        acc.push({ name: date, amount: transaction.amount });
-      }
-      return acc;
-    }, [])
-    .slice(-7) || [];
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -103,36 +85,39 @@ const Admin = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-      </div>
+      <AdminHeader users={users} transactions={transactions} />
+      
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="transactions">Transactions</TabsTrigger>
+          <TabsTrigger value="withdrawals">Withdrawal Settings</TabsTrigger>
+          <TabsTrigger value="broadcast">Broadcast</TabsTrigger>
+        </TabsList>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <MetricsCard
-          title="Total Balance"
-          value={totalBalance}
-          change={{ value: 15, type: "increase" }}
-        />
-        <MetricsCard
-          title="Total Investments"
-          value={totalInvestments}
-          change={{ value: 8, type: "increase" }}
-        />
-        <MetricsCard
-          title="Recent Transactions"
-          value={recentTransactionsTotal}
-          change={{ value: 12, type: "increase" }}
-        />
-      </div>
+        <TabsContent value="overview">
+          <div className="grid gap-6">
+            <InvestmentOverview investments={investments} />
+            <UserOverview users={users} />
+          </div>
+        </TabsContent>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RevenueChart data={revenueData} />
-        <TransactionList 
-          transactions={transactions || []} 
-          onApprove={handleTransactionApproval}
-          onReject={handleTransactionRejection}
-        />
-      </div>
+        <TabsContent value="transactions">
+          <TransactionTabs
+            transactions={transactions}
+            onApprove={handleTransactionApproval}
+            onReject={handleTransactionRejection}
+          />
+        </TabsContent>
+
+        <TabsContent value="withdrawals">
+          <WithdrawalSettings />
+        </TabsContent>
+
+        <TabsContent value="broadcast">
+          <BroadcastNotification />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

@@ -104,8 +104,6 @@ export type Database = {
           created_at: string
           id: string
           phone_number: string | null
-          referral_code: string | null
-          referred_by: string | null
           updated_at: string
           username: string | null
         }
@@ -115,8 +113,6 @@ export type Database = {
           created_at?: string
           id: string
           phone_number?: string | null
-          referral_code?: string | null
-          referred_by?: string | null
           updated_at?: string
           username?: string | null
         }
@@ -126,72 +122,10 @@ export type Database = {
           created_at?: string
           id?: string
           phone_number?: string | null
-          referral_code?: string | null
-          referred_by?: string | null
           updated_at?: string
           username?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_referred_by_fkey"
-            columns: ["referred_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["referral_code"]
-          },
-        ]
-      }
-      referral_rewards: {
-        Row: {
-          amount: number
-          created_at: string
-          id: string
-          investment_id: string
-          referred_id: string
-          referrer_id: string
-          updated_at: string
-        }
-        Insert: {
-          amount: number
-          created_at?: string
-          id?: string
-          investment_id: string
-          referred_id: string
-          referrer_id: string
-          updated_at?: string
-        }
-        Update: {
-          amount?: number
-          created_at?: string
-          id?: string
-          investment_id?: string
-          referred_id?: string
-          referrer_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "referral_rewards_investment_id_fkey"
-            columns: ["investment_id"]
-            isOneToOne: false
-            referencedRelation: "investments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "referral_rewards_referred_id_fkey"
-            columns: ["referred_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "referral_rewards_referrer_id_fkey"
-            columns: ["referrer_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       settings: {
         Row: {

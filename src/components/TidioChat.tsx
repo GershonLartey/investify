@@ -14,7 +14,8 @@ const TidioChat = () => {
         window.tidioChatApi.on("ready", function() {
           const iframe = document.querySelector('iframe[src*="tidio"]');
           if (iframe) {
-            (iframe as HTMLElement).style.bottom = "80px"; // Move it up to avoid navbar
+            (iframe as HTMLElement).style.bottom = "100px"; // Move it up above navbar
+            (iframe as HTMLElement).style.zIndex = "30"; // Lower z-index than navbar
           }
         });
       } else {
