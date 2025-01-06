@@ -2,13 +2,17 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useAdminData } from "./Admin/hooks/useAdminData";
-import AdminHeader from "./Admin/components/AdminHeader";
-import TransactionTabs from "./Admin/components/TransactionTabs";
-import InvestmentOverview from "./Admin/components/InvestmentOverview";
-import UserOverview from "./Admin/components/UserOverview";
-import { Loader } from "lucide-react";
+import { useAdminData } from "./hooks/useAdminData";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader } from "lucide-react";
+import AdminHeader from "./components/AdminHeader";
+import TransactionList from "./components/TransactionList";
+import UserTable from "./components/UserTable";
+import InvestmentTable from "./components/InvestmentTable";
+import WithdrawalSettings from "./components/WithdrawalSettings";
+import BroadcastNotification from "./components/BroadcastNotification";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -60,6 +64,15 @@ const Admin = () => {
     isError,
   } = useAdminData(isLoading);
 
+  // Calculate totals for header
+  const totalDeposits = transactions?.reduce((sum, t) => 
+    t.type === 'deposit' && t.status === 'approved' ? sum + t.amount : sum, 0) || 0;
+  
+  const totalWithdrawals = transactions?.reduce((sum, t) => 
+    t.type === 'withdrawal' && t.status === 'approved' ? sum + t.amount : sum, 0) || 0;
+  
+  const netBalance = totalDeposits - totalWithdrawals;
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -82,16 +95,51 @@ const Admin = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <AdminHeader users={users} transactions={transactions} />
-      <div className="grid gap-6">
-        <TransactionTabs
-          transactions={transactions}
-          onApprove={handleTransactionApproval}
-          onReject={handleTransactionRejection}
-        />
-        <InvestmentOverview investments={investments} />
-        <UserOverview users={users} />
-      </div>
+      <AdminHeader 
+        totalDeposits={totalDeposits}
+        totalWithdrawals={totalWithdrawals}
+        netBalance={netBalance}
+      />
+      
+      <Tabs defaultValue="transactions" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="transactions">Transactions</TabsTrigger>
+          <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="investments">Investments</TabsTrigger>
+          <TabsTrigger value="withdrawals">Withdrawal Settings</TabsTrigger>
+          <TabsTrigger value="broadcast">Broadcast Message</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="transactions">
+          <Card className="p-6">
+            <TransactionList
+              transactions={transactions || []}
+              onApprove={handleTransactionApproval}
+              onReject={handleTransactionRejection}
+            />
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="users">
+          <Card className="p-6">
+            <UserTable users={users || []} />
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="investments">
+          <Card className="p-6">
+            <InvestmentTable investments={investments || []} />
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="withdrawals">
+          <WithdrawalSettings />
+        </TabsContent>
+
+        <TabsContent value="broadcast">
+          <BroadcastNotification />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
