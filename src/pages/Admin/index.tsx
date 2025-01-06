@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader } from "lucide-react";
-import DashboardHeader from "./components/DashboardHeader";
+import AdminHeader from "./components/AdminHeader";
 import TransactionList from "./components/TransactionList";
 import UserTable from "./components/UserTable";
 import InvestmentTable from "./components/InvestmentTable";
@@ -95,7 +95,7 @@ const Admin = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <DashboardHeader 
+      <AdminHeader 
         totalDeposits={totalDeposits}
         totalWithdrawals={totalWithdrawals}
         netBalance={netBalance}
