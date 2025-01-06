@@ -1,11 +1,10 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Transaction, User, Investment } from "../types";
 
 export const useAdminData = (isLoading: boolean) => {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   // Fetch users data
   const { data: users, error: usersError } = useQuery({
@@ -81,9 +80,6 @@ export const useAdminData = (isLoading: boolean) => {
         title: "Success",
         description: "Transaction approved successfully",
       });
-
-      queryClient.invalidateQueries({ queryKey: ['admin-transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
     } catch (error) {
       console.error('Error approving transaction:', error);
       toast({
@@ -108,8 +104,6 @@ export const useAdminData = (isLoading: boolean) => {
         title: "Success",
         description: "Transaction rejected successfully",
       });
-
-      queryClient.invalidateQueries({ queryKey: ['admin-transactions'] });
     } catch (error) {
       console.error('Error rejecting transaction:', error);
       toast({
