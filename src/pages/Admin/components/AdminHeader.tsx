@@ -7,6 +7,7 @@ interface AdminHeaderProps {
 }
 
 const AdminHeader = ({ users, transactions }: AdminHeaderProps) => {
+  // Calculate totals
   const totalBalance = users?.reduce((sum, user) => sum + (user.balance || 0), 0) || 0;
   const totalDeposits = transactions
     ?.filter(t => t.type === 'deposit' && t.status === 'approved')

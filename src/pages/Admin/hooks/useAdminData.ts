@@ -1,4 +1,3 @@
-import React from 'react';
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -8,6 +7,7 @@ export const useAdminData = (isLoading: boolean) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Fetch users data
   const { data: users, error: usersError } = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
@@ -24,11 +24,9 @@ export const useAdminData = (isLoading: boolean) => {
     },
     enabled: !isLoading,
     retry: 1,
-    meta: {
-      errorMessage: 'Failed to fetch users'
-    }
   });
 
+  // Fetch transactions data
   const { data: transactions, error: transactionsError } = useQuery({
     queryKey: ['admin-transactions'],
     queryFn: async () => {
@@ -47,11 +45,9 @@ export const useAdminData = (isLoading: boolean) => {
     enabled: !isLoading,
     refetchInterval: 5000,
     retry: 1,
-    meta: {
-      errorMessage: 'Failed to fetch transactions'
-    }
   });
 
+  // Fetch investments data
   const { data: investments, error: investmentsError } = useQuery({
     queryKey: ['admin-investments'],
     queryFn: async () => {
@@ -69,21 +65,9 @@ export const useAdminData = (isLoading: boolean) => {
     },
     enabled: !isLoading,
     retry: 1,
-    meta: {
-      errorMessage: 'Failed to fetch investments'
-    }
   });
 
-  React.useEffect(() => {
-    if (usersError || transactionsError || investmentsError) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch admin data. Please try again.",
-        variant: "destructive",
-      });
-    }
-  }, [usersError, transactionsError, investmentsError, toast]);
-
+  // Handle transaction approval
   const handleTransactionApproval = async (transaction: Transaction) => {
     try {
       const { error } = await supabase
@@ -110,6 +94,7 @@ export const useAdminData = (isLoading: boolean) => {
     }
   };
 
+  // Handle transaction rejection
   const handleTransactionRejection = async (transaction: Transaction) => {
     try {
       const { error } = await supabase

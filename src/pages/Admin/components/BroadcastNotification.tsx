@@ -26,7 +26,7 @@ const BroadcastNotification = () => {
     mutationFn: async () => {
       console.log("Broadcasting notification to all users...");
       
-      // First get all users
+      // Get all users
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('id');

@@ -18,6 +18,7 @@ const Admin = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
 
+  // Check admin access on component mount
   useEffect(() => {
     const checkAdminAccess = async () => {
       try {
@@ -54,6 +55,7 @@ const Admin = () => {
     checkAdminAccess();
   }, [navigate, toast]);
 
+  // Fetch admin data using custom hook
   const {
     users,
     transactions,
@@ -63,6 +65,7 @@ const Admin = () => {
     isError,
   } = useAdminData(isLoading);
 
+  // Loading state
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -71,6 +74,7 @@ const Admin = () => {
     );
   }
 
+  // Error state
   if (isError) {
     return (
       <div className="p-6">
@@ -88,18 +92,16 @@ const Admin = () => {
       <AdminHeader users={users} transactions={transactions} />
       
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList>
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
           <TabsTrigger value="withdrawals">Withdrawal Settings</TabsTrigger>
           <TabsTrigger value="broadcast">Broadcast</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview">
-          <div className="grid gap-6">
-            <InvestmentOverview investments={investments} />
-            <UserOverview users={users} />
-          </div>
+        <TabsContent value="overview" className="space-y-6">
+          <InvestmentOverview investments={investments} />
+          <UserOverview users={users} />
         </TabsContent>
 
         <TabsContent value="transactions">
