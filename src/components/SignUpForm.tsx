@@ -30,20 +30,33 @@ const SignUpForm = () => {
         throw new Error("Please enter a valid 10-digit phone number");
       }
 
+      // Format phone number to ensure consistency
+      const formattedPhoneNumber = phoneNumber.replace(/\D/g, '');
+
+      console.log("Attempting signup with data:", {
+        email,
+        username,
+        phone_number: formattedPhoneNumber
+      });
+
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            username,
-            phone_number: phoneNumber,
+            username: username,
+            phone_number: formattedPhoneNumber,
           }
         }
       });
 
-      if (signUpError) throw signUpError;
+      if (signUpError) {
+        console.error("Signup error:", signUpError);
+        throw signUpError;
+      }
 
       if (signUpData.user) {
+        console.log("Signup successful:", signUpData);
         toast({
           title: "Success",
           description: "Account created successfully! Please verify your email.",
@@ -96,10 +109,11 @@ const SignUpForm = () => {
       <div>
         <Input
           type="password"
-          placeholder="Password"
+          placeholder="Password (min 6 characters)"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          minLength={6}
         />
       </div>
       <div>
@@ -109,6 +123,7 @@ const SignUpForm = () => {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
+          minLength={6}
         />
       </div>
       <Button type="submit" className="w-full" disabled={loading}>
