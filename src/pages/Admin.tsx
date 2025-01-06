@@ -9,6 +9,8 @@ import { Loader } from "lucide-react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import AdminSidebar from "@/pages/Admin/components/AdminSidebar";
 import AdminHeader from "@/pages/Admin/components/AdminHeader";
+import AdminMetrics from "@/pages/Admin/components/AdminMetrics";
+import RevenueChart from "@/pages/Admin/components/RevenueChart";
 import TransactionList from "@/pages/Admin/components/TransactionList";
 import UserTable from "@/pages/Admin/components/UserTable";
 import InvestmentTable from "@/pages/Admin/components/InvestmentTable";
@@ -75,6 +77,21 @@ const Admin = () => {
   
   const netBalance = totalDeposits - totalWithdrawals;
 
+  // Prepare revenue data for chart
+  const revenueData = transactions
+    ?.filter(t => t.status === 'approved')
+    ?.reduce((acc, t) => {
+      const date = new Date(t.created_at).toLocaleDateString();
+      const existingDay = acc.find(d => d.name === date);
+      if (existingDay) {
+        existingDay.amount += t.type === 'deposit' ? t.amount : -t.amount;
+      } else {
+        acc.push({ name: date, amount: t.type === 'deposit' ? t.amount : -t.amount });
+      }
+      return acc;
+    }, [] as Array<{ name: string; amount: number }>)
+    ?.slice(-7) || [];
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -99,15 +116,20 @@ const Admin = () => {
     switch (activeView) {
       case "overview":
         return (
-          <AdminHeader 
-            totalDeposits={totalDeposits}
-            totalWithdrawals={totalWithdrawals}
-            netBalance={netBalance}
-          />
+          <div className="space-y-6">
+            <AdminHeader 
+              totalDeposits={totalDeposits}
+              totalWithdrawals={totalWithdrawals}
+              netBalance={netBalance}
+            />
+            <AdminMetrics />
+            <RevenueChart data={revenueData} />
+          </div>
         );
       case "pending-transactions":
         return (
           <Card className="p-6">
+            <h2 className="text-2xl font-semibold mb-6">Pending Transactions</h2>
             <TransactionList
               transactions={transactions?.filter(t => t.status === 'pending') || []}
               onApprove={handleTransactionApproval}
@@ -118,6 +140,7 @@ const Admin = () => {
       case "completed-transactions":
         return (
           <Card className="p-6">
+            <h2 className="text-2xl font-semibold mb-6">Completed Transactions</h2>
             <TransactionList
               transactions={transactions?.filter(t => t.status !== 'pending') || []}
               onApprove={handleTransactionApproval}
@@ -128,19 +151,31 @@ const Admin = () => {
       case "users":
         return (
           <Card className="p-6">
+            <h2 className="text-2xl font-semibold mb-6">User Management</h2>
             <UserTable users={users || []} />
           </Card>
         );
       case "investments":
         return (
           <Card className="p-6">
+            <h2 className="text-2xl font-semibold mb-6">Investment Overview</h2>
             <InvestmentTable investments={investments || []} />
           </Card>
         );
       case "withdrawals":
-        return <WithdrawalSettings />;
+        return (
+          <div>
+            <h2 className="text-2xl font-semibold mb-6">Withdrawal Settings</h2>
+            <WithdrawalSettings />
+          </div>
+        );
       case "broadcast":
-        return <BroadcastNotification />;
+        return (
+          <div>
+            <h2 className="text-2xl font-semibold mb-6">Broadcast Message</h2>
+            <BroadcastNotification />
+          </div>
+        );
       default:
         return null;
     }
