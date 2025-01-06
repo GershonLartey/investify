@@ -5,15 +5,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 
 const WithdrawalSettings = () => {
   const { toast } = useToast();
@@ -24,6 +18,7 @@ const WithdrawalSettings = () => {
   const { data: settings } = useQuery({
     queryKey: ['withdrawal-settings'],
     queryFn: async () => {
+      console.log('Fetching withdrawal settings...');
       const { data, error } = await supabase
         .from('withdrawal_settings')
         .select('*')
@@ -103,13 +98,12 @@ const WithdrawalSettings = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Withdrawal Settings</h2>
-
       <Card className="p-6">
+        <h2 className="text-xl font-semibold mb-4">Add New Network</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Network</label>
+              <label className="block text-sm font-medium mb-1">Network Name</label>
               <Input
                 value={newNetwork}
                 onChange={(e) => setNewNetwork(e.target.value)}
@@ -127,11 +121,21 @@ const WithdrawalSettings = () => {
               />
             </div>
           </div>
-          <Button type="submit">Add Network</Button>
+          <Button type="submit" disabled={addSettingMutation.isPending}>
+            {addSettingMutation.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Adding...
+              </>
+            ) : (
+              "Add Network"
+            )}
+          </Button>
         </form>
       </Card>
 
       <Card className="p-6">
+        <h2 className="text-xl font-semibold mb-4">Network Settings</h2>
         <Table>
           <TableHeader>
             <TableRow>
@@ -157,6 +161,13 @@ const WithdrawalSettings = () => {
                 </TableCell>
               </TableRow>
             ))}
+            {(!settings || settings.length === 0) && (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
+                  No networks configured
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </Card>

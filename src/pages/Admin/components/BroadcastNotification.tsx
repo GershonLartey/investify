@@ -5,13 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 
@@ -89,68 +83,65 @@ const BroadcastNotification = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Broadcast Notification</h2>
-
-      <Card className="p-6">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Title</label>
-            <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Notification title"
-              disabled={broadcastMutation.isPending}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Message</label>
-            <Textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Notification message"
-              rows={4}
-              disabled={broadcastMutation.isPending}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Type</label>
-            <Select 
-              value={type} 
-              onValueChange={setType}
-              disabled={broadcastMutation.isPending}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="info">Info</SelectItem>
-                <SelectItem value="success">Success</SelectItem>
-                <SelectItem value="warning">Warning</SelectItem>
-                <SelectItem value="error">Error</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Button 
-            type="submit"
+    <Card className="p-6">
+      <h2 className="text-xl font-semibold mb-6">Send Broadcast Message</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Title</label>
+          <Input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Notification title"
             disabled={broadcastMutation.isPending}
-            className="w-full"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Message</label>
+          <Textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Type your message here..."
+            rows={4}
+            disabled={broadcastMutation.isPending}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Message Type</label>
+          <Select 
+            value={type} 
+            onValueChange={setType}
+            disabled={broadcastMutation.isPending}
           >
-            {broadcastMutation.isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Sending...
-              </>
-            ) : (
-              "Send Broadcast"
-            )}
-          </Button>
-        </form>
-      </Card>
-    </div>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="info">Info</SelectItem>
+              <SelectItem value="success">Success</SelectItem>
+              <SelectItem value="warning">Warning</SelectItem>
+              <SelectItem value="error">Error</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <Button 
+          type="submit"
+          disabled={broadcastMutation.isPending}
+          className="w-full"
+        >
+          {broadcastMutation.isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Sending...
+            </>
+          ) : (
+            "Send Broadcast"
+          )}
+        </Button>
+      </form>
+    </Card>
   );
 };
 
