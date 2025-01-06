@@ -8,7 +8,6 @@ interface AdminHeaderProps {
 }
 
 const AdminHeader = ({ totalDeposits, totalWithdrawals, netBalance }: AdminHeaderProps) => {
-  // Format numbers with commas and 2 decimal places
   const formatCurrency = (amount: number) => {
     return amount.toLocaleString('en-GH', {
       minimumFractionDigits: 2,
