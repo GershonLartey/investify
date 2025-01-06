@@ -3,11 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAdminData } from "@/pages/Admin/hooks/useAdminData";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader } from "lucide-react";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import AdminSidebar from "@/pages/Admin/components/AdminSidebar";
 import AdminHeader from "@/pages/Admin/components/AdminHeader";
 import TransactionList from "@/pages/Admin/components/TransactionList";
 import UserTable from "@/pages/Admin/components/UserTable";
@@ -19,7 +18,6 @@ const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
-  const [activeView, setActiveView] = useState("overview");
 
   useEffect(() => {
     const checkAdminAccess = async () => {
@@ -95,66 +93,54 @@ const Admin = () => {
     );
   }
 
-  const renderContent = () => {
-    switch (activeView) {
-      case "overview":
-        return (
-          <AdminHeader 
-            totalDeposits={totalDeposits}
-            totalWithdrawals={totalWithdrawals}
-            netBalance={netBalance}
-          />
-        );
-      case "pending-transactions":
-        return (
+  return (
+    <div className="p-6 space-y-6">
+      <AdminHeader 
+        totalDeposits={totalDeposits}
+        totalWithdrawals={totalWithdrawals}
+        netBalance={netBalance}
+      />
+      
+      <Tabs defaultValue="transactions" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="transactions">Transactions</TabsTrigger>
+          <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="investments">Investments</TabsTrigger>
+          <TabsTrigger value="withdrawals">Withdrawal Settings</TabsTrigger>
+          <TabsTrigger value="broadcast">Broadcast Message</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="transactions">
           <Card className="p-6">
             <TransactionList
-              transactions={transactions?.filter(t => t.status === 'pending') || []}
+              transactions={transactions || []}
               onApprove={handleTransactionApproval}
               onReject={handleTransactionRejection}
             />
           </Card>
-        );
-      case "completed-transactions":
-        return (
-          <Card className="p-6">
-            <TransactionList
-              transactions={transactions?.filter(t => t.status !== 'pending') || []}
-              onApprove={handleTransactionApproval}
-              onReject={handleTransactionRejection}
-            />
-          </Card>
-        );
-      case "users":
-        return (
+        </TabsContent>
+
+        <TabsContent value="users">
           <Card className="p-6">
             <UserTable users={users || []} />
           </Card>
-        );
-      case "investments":
-        return (
+        </TabsContent>
+
+        <TabsContent value="investments">
           <Card className="p-6">
             <InvestmentTable investments={investments || []} />
           </Card>
-        );
-      case "withdrawals":
-        return <WithdrawalSettings />;
-      case "broadcast":
-        return <BroadcastNotification />;
-      default:
-        return null;
-    }
-  };
+        </TabsContent>
 
-  return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <AdminSidebar activeView={activeView} onViewChange={setActiveView} />
-        <main className="flex-1 p-6">
-          {renderContent()}
-        </main>
-      </div>
-    </SidebarProvider>
+        <TabsContent value="withdrawals">
+          <WithdrawalSettings />
+        </TabsContent>
+
+        <TabsContent value="broadcast">
+          <BroadcastNotification />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 
