@@ -2,17 +2,17 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useAdminData } from "./hooks/useAdminData";
+import { useAdminData } from "@/pages/Admin/hooks/useAdminData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader } from "lucide-react";
-import AdminHeader from "./components/AdminHeader";
-import TransactionList from "./components/TransactionList";
-import UserTable from "./components/UserTable";
-import InvestmentTable from "./components/InvestmentTable";
-import WithdrawalSettings from "./components/WithdrawalSettings";
-import BroadcastNotification from "./components/BroadcastNotification";
+import AdminHeader from "@/pages/Admin/components/AdminHeader";
+import TransactionList from "@/pages/Admin/components/TransactionList";
+import UserTable from "@/pages/Admin/components/UserTable";
+import InvestmentTable from "@/pages/Admin/components/InvestmentTable";
+import WithdrawalSettings from "@/pages/Admin/components/WithdrawalSettings";
+import BroadcastNotification from "@/pages/Admin/components/BroadcastNotification";
 
 const Admin = () => {
   const navigate = useNavigate();
