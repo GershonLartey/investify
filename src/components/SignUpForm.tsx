@@ -15,14 +15,6 @@ const SignUpForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const validatePassword = (password: string) => {
-    const errors = [];
-    if (password.length < 6) {
-      errors.push("Password must be at least 6 characters long");
-    }
-    return errors;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -31,12 +23,6 @@ const SignUpForm = () => {
       // Validate passwords match
       if (password !== confirmPassword) {
         throw new Error("Passwords do not match");
-      }
-
-      // Validate password strength
-      const passwordErrors = validatePassword(password);
-      if (passwordErrors.length > 0) {
-        throw new Error(passwordErrors[0]);
       }
 
       // Validate phone number format (simple validation)
@@ -110,11 +96,10 @@ const SignUpForm = () => {
       <div>
         <Input
           type="password"
-          placeholder="Password (min. 6 characters)"
+          placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          minLength={6}
         />
       </div>
       <div>
@@ -124,7 +109,6 @@ const SignUpForm = () => {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
-          minLength={6}
         />
       </div>
       <Button type="submit" className="w-full" disabled={loading}>
