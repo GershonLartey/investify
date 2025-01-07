@@ -12,18 +12,25 @@ export const useAdminData = (isLoading: boolean) => {
     queryKey: ['admin-users'],
     queryFn: async () => {
       console.log('Fetching users...');
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*');
-      
-      if (error) {
-        console.error('Error fetching users:', error);
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*');
+        
+        if (error) {
+          console.error('Error fetching users:', error);
+          throw error;
+        }
+        console.log('Successfully fetched users:', data);
+        return data as User[];
+      } catch (error) {
+        console.error('Network error fetching users:', error);
         throw error;
       }
-      return data as User[];
     },
     enabled: !isLoading,
-    retry: 1,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   // Fetch transactions data
@@ -31,20 +38,27 @@ export const useAdminData = (isLoading: boolean) => {
     queryKey: ['admin-transactions'],
     queryFn: async () => {
       console.log('Fetching transactions...');
-      const { data, error } = await supabase
-        .from('transactions')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error('Error fetching transactions:', error);
+      try {
+        const { data, error } = await supabase
+          .from('transactions')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          console.error('Error fetching transactions:', error);
+          throw error;
+        }
+        console.log('Successfully fetched transactions:', data);
+        return data as Transaction[];
+      } catch (error) {
+        console.error('Network error fetching transactions:', error);
         throw error;
       }
-      return data as Transaction[];
     },
     enabled: !isLoading,
     refetchInterval: 5000,
-    retry: 1,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   // Fetch investments data
@@ -52,24 +66,32 @@ export const useAdminData = (isLoading: boolean) => {
     queryKey: ['admin-investments'],
     queryFn: async () => {
       console.log('Fetching investments...');
-      const { data, error } = await supabase
-        .from('investments')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error('Error fetching investments:', error);
+      try {
+        const { data, error } = await supabase
+          .from('investments')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          console.error('Error fetching investments:', error);
+          throw error;
+        }
+        console.log('Successfully fetched investments:', data);
+        return data as Investment[];
+      } catch (error) {
+        console.error('Network error fetching investments:', error);
         throw error;
       }
-      return data as Investment[];
     },
     enabled: !isLoading,
-    retry: 1,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   // Handle transaction approval
   const handleTransactionApproval = async (transaction: Transaction) => {
     try {
+      console.log('Approving transaction:', transaction.id);
       const { error } = await supabase
         .from('transactions')
         .update({ status: 'approved' })
@@ -77,6 +99,7 @@ export const useAdminData = (isLoading: boolean) => {
 
       if (error) throw error;
 
+      console.log('Transaction approved successfully:', transaction.id);
       toast({
         title: "Success",
         description: "Transaction approved successfully",
@@ -88,7 +111,7 @@ export const useAdminData = (isLoading: boolean) => {
       console.error('Error approving transaction:', error);
       toast({
         title: "Error",
-        description: "Failed to approve transaction",
+        description: "Failed to approve transaction. Please try again.",
         variant: "destructive",
       });
     }
@@ -97,6 +120,7 @@ export const useAdminData = (isLoading: boolean) => {
   // Handle transaction rejection
   const handleTransactionRejection = async (transaction: Transaction) => {
     try {
+      console.log('Rejecting transaction:', transaction.id);
       const { error } = await supabase
         .from('transactions')
         .update({ status: 'rejected' })
@@ -104,6 +128,7 @@ export const useAdminData = (isLoading: boolean) => {
 
       if (error) throw error;
 
+      console.log('Transaction rejected successfully:', transaction.id);
       toast({
         title: "Success",
         description: "Transaction rejected successfully",
@@ -114,11 +139,39 @@ export const useAdminData = (isLoading: boolean) => {
       console.error('Error rejecting transaction:', error);
       toast({
         title: "Error",
-        description: "Failed to reject transaction",
+        description: "Failed to reject transaction. Please try again.",
         variant: "destructive",
       });
     }
   };
+
+  // Show error toasts for failed queries
+  if (usersError) {
+    console.error('Users query error:', usersError);
+    toast({
+      title: "Error",
+      description: "Failed to load users. Please refresh the page.",
+      variant: "destructive",
+    });
+  }
+
+  if (transactionsError) {
+    console.error('Transactions query error:', transactionsError);
+    toast({
+      title: "Error",
+      description: "Failed to load transactions. Please refresh the page.",
+      variant: "destructive",
+    });
+  }
+
+  if (investmentsError) {
+    console.error('Investments query error:', investmentsError);
+    toast({
+      title: "Error",
+      description: "Failed to load investments. Please refresh the page.",
+      variant: "destructive",
+    });
+  }
 
   return {
     users,
