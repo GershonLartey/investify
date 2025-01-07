@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAdminData } from "@/pages/Admin/hooks/useAdminData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader } from "lucide-react";
+import { Loader, Home, TrendingUp, User, Bell, Settings } from "lucide-react";
 import AdminHeader from "@/pages/Admin/components/AdminHeader";
 import TransactionList from "@/pages/Admin/components/TransactionList";
 import UserTable from "@/pages/Admin/components/UserTable";
@@ -18,6 +18,7 @@ const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     const checkAdminAccess = async () => {
@@ -93,117 +94,127 @@ const Admin = () => {
     );
   }
 
+  const sidebarItems = [
+    { id: "overview", label: "Overview", icon: Home },
+    { id: "transactions", label: "Transactions", icon: TrendingUp },
+    { id: "users", label: "Users", icon: User },
+    { id: "notifications", label: "Notifications", icon: Bell },
+    { id: "settings", label: "Settings", icon: Settings },
+  ];
+
   return (
     <div className="min-h-screen bg-[#F8F9FA]">
       <div className="flex">
         {/* Sidebar */}
-        <div className="w-64 min-h-screen bg-sidebar text-sidebar-foreground p-6">
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold">Admin Panel</h1>
-          </div>
-          <nav className="space-y-6">
-            <div>
-              <h2 className="text-sm font-semibold mb-4 uppercase tracking-wider text-gray-300">Menu</h2>
-              <div className="space-y-2">
-                <button className="w-full text-left px-4 py-2 rounded-md bg-secondary/10 text-secondary">
-                  Overview
-                </button>
-                <button className="w-full text-left px-4 py-2 rounded-md hover:bg-white/10">
-                  Transactions
-                </button>
-                <button className="w-full text-left px-4 py-2 rounded-md hover:bg-white/10">
-                  Users
-                </button>
-                <button className="w-full text-left px-4 py-2 rounded-md hover:bg-white/10">
-                  Settings
-                </button>
+        <div className="w-64 min-h-screen bg-sidebar text-sidebar-foreground fixed left-0 top-0">
+          <div className="p-6">
+            <h1 className="text-2xl font-bold mb-8">Admin Panel</h1>
+            <nav className="space-y-6">
+              <div>
+                <h2 className="text-sm font-semibold mb-4 uppercase tracking-wider text-gray-300">
+                  Menu
+                </h2>
+                <div className="space-y-1">
+                  {sidebarItems.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveTab(item.id)}
+                      className={`w-full flex items-center gap-3 text-left px-4 py-2 rounded-md transition-colors ${
+                        activeTab === item.id
+                          ? "bg-secondary/10 text-secondary"
+                          : "hover:bg-white/10 text-white"
+                      }`}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          </nav>
+            </nav>
+          </div>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-gray-500 mt-2">Manage your platform's data and settings</p>
+        <div className="flex-1 ml-64">
+          <div className="p-8">
+            <div className="max-w-7xl mx-auto">
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+                <p className="text-gray-500 mt-2">
+                  Manage your platform's data and settings
+                </p>
+              </div>
+
+              <AdminHeader 
+                totalDeposits={totalDeposits}
+                totalWithdrawals={totalWithdrawals}
+                netBalance={netBalance}
+              />
+              
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
+                <TabsList className="grid w-full grid-cols-5 bg-white rounded-lg p-1">
+                  <TabsTrigger 
+                    value="overview"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
+                  >
+                    Overview
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="transactions"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
+                  >
+                    Transactions
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="users"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
+                  >
+                    Users
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="notifications"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
+                  >
+                    Notifications
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="settings"
+                    className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
+                  >
+                    Settings
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="transactions">
+                  <Card className="mt-6 bg-white shadow-sm">
+                    <TransactionList
+                      transactions={transactions || []}
+                      onApprove={handleTransactionApproval}
+                      onReject={handleTransactionRejection}
+                    />
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="users">
+                  <Card className="mt-6 bg-white shadow-sm">
+                    <UserTable users={users || []} />
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="notifications">
+                  <Card className="mt-6 bg-white shadow-sm">
+                    <BroadcastNotification />
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="settings">
+                  <Card className="mt-6 bg-white shadow-sm">
+                    <WithdrawalSettings />
+                  </Card>
+                </TabsContent>
+              </Tabs>
             </div>
-
-            <AdminHeader 
-              totalDeposits={totalDeposits}
-              totalWithdrawals={totalWithdrawals}
-              netBalance={netBalance}
-            />
-            
-            <Tabs defaultValue="transactions" className="mt-8">
-              <TabsList className="grid w-full grid-cols-5 bg-white rounded-lg p-1">
-                <TabsTrigger 
-                  value="transactions"
-                  className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
-                >
-                  Transactions
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="users"
-                  className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
-                >
-                  Users
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="investments"
-                  className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
-                >
-                  Investments
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="withdrawals"
-                  className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
-                >
-                  Withdrawal Settings
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="broadcast"
-                  className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
-                >
-                  Broadcast Message
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="transactions">
-                <Card className="mt-6 bg-white shadow-sm">
-                  <TransactionList
-                    transactions={transactions || []}
-                    onApprove={handleTransactionApproval}
-                    onReject={handleTransactionRejection}
-                  />
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="users">
-                <Card className="mt-6 bg-white shadow-sm">
-                  <UserTable users={users || []} />
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="investments">
-                <Card className="mt-6 bg-white shadow-sm">
-                  <InvestmentTable investments={investments || []} />
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="withdrawals">
-                <Card className="mt-6 bg-white shadow-sm">
-                  <WithdrawalSettings />
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="broadcast">
-                <Card className="mt-6 bg-white shadow-sm">
-                  <BroadcastNotification />
-                </Card>
-              </TabsContent>
-            </Tabs>
           </div>
         </div>
       </div>
