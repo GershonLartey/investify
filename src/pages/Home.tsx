@@ -135,7 +135,10 @@ const Home = () => {
             Join our platform today and start growing your wealth
           </p>
           <button
-            onClick={() => document.querySelector('[value="signup"]')?.click()}
+            onClick={() => {
+              const signupTab = document.querySelector('[value="signup"]') as HTMLButtonElement;
+              if (signupTab) signupTab.click();
+            }}
             className="bg-white text-primary px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center gap-2"
           >
             Get Started Now
