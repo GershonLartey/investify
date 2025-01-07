@@ -25,16 +25,16 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#1E3A8A",
+          DEFAULT: "#0F4C3A",
           foreground: "#FFFFFF",
         },
         secondary: {
-          DEFAULT: "#059669",
-          foreground: "#FFFFFF",
+          DEFAULT: "#86DC3D",
+          foreground: "#0F4C3A",
         },
         accent: {
-          DEFAULT: "#B45309",
-          foreground: "#FFFFFF",
+          DEFAULT: "#E5E7EB",
+          foreground: "#0F4C3A",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -49,14 +49,18 @@ export default {
           foreground: "hsl(var(--popover-foreground))",
         },
         card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+          DEFAULT: "#FFFFFF",
+          foreground: "#0F4C3A",
         },
+        sidebar: {
+          DEFAULT: "#0F4C3A",
+          foreground: "#FFFFFF",
+        }
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        lg: "1rem",
+        md: "0.75rem",
+        sm: "0.5rem",
       },
       fontFamily: {
         sans: ["Inter", "sans-serif"],

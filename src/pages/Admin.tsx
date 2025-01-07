@@ -94,52 +94,119 @@ const Admin = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <AdminHeader 
-        totalDeposits={totalDeposits}
-        totalWithdrawals={totalWithdrawals}
-        netBalance={netBalance}
-      />
-      
-      <Tabs defaultValue="transactions" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="transactions">Transactions</TabsTrigger>
-          <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="investments">Investments</TabsTrigger>
-          <TabsTrigger value="withdrawals">Withdrawal Settings</TabsTrigger>
-          <TabsTrigger value="broadcast">Broadcast Message</TabsTrigger>
-        </TabsList>
+    <div className="min-h-screen bg-[#F8F9FA]">
+      <div className="flex">
+        {/* Sidebar */}
+        <div className="w-64 min-h-screen bg-sidebar text-sidebar-foreground p-6">
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold">Admin Panel</h1>
+          </div>
+          <nav className="space-y-6">
+            <div>
+              <h2 className="text-sm font-semibold mb-4 uppercase tracking-wider text-gray-300">Menu</h2>
+              <div className="space-y-2">
+                <button className="w-full text-left px-4 py-2 rounded-md bg-secondary/10 text-secondary">
+                  Overview
+                </button>
+                <button className="w-full text-left px-4 py-2 rounded-md hover:bg-white/10">
+                  Transactions
+                </button>
+                <button className="w-full text-left px-4 py-2 rounded-md hover:bg-white/10">
+                  Users
+                </button>
+                <button className="w-full text-left px-4 py-2 rounded-md hover:bg-white/10">
+                  Settings
+                </button>
+              </div>
+            </div>
+          </nav>
+        </div>
 
-        <TabsContent value="transactions">
-          <Card className="p-6">
-            <TransactionList
-              transactions={transactions || []}
-              onApprove={handleTransactionApproval}
-              onReject={handleTransactionRejection}
+        {/* Main Content */}
+        <div className="flex-1 p-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+              <p className="text-gray-500 mt-2">Manage your platform's data and settings</p>
+            </div>
+
+            <AdminHeader 
+              totalDeposits={totalDeposits}
+              totalWithdrawals={totalWithdrawals}
+              netBalance={netBalance}
             />
-          </Card>
-        </TabsContent>
+            
+            <Tabs defaultValue="transactions" className="mt-8">
+              <TabsList className="grid w-full grid-cols-5 bg-white rounded-lg p-1">
+                <TabsTrigger 
+                  value="transactions"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
+                >
+                  Transactions
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="users"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
+                >
+                  Users
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="investments"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
+                >
+                  Investments
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="withdrawals"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
+                >
+                  Withdrawal Settings
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="broadcast"
+                  className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
+                >
+                  Broadcast Message
+                </TabsTrigger>
+              </TabsList>
 
-        <TabsContent value="users">
-          <Card className="p-6">
-            <UserTable users={users || []} />
-          </Card>
-        </TabsContent>
+              <TabsContent value="transactions">
+                <Card className="mt-6 bg-white shadow-sm">
+                  <TransactionList
+                    transactions={transactions || []}
+                    onApprove={handleTransactionApproval}
+                    onReject={handleTransactionRejection}
+                  />
+                </Card>
+              </TabsContent>
 
-        <TabsContent value="investments">
-          <Card className="p-6">
-            <InvestmentTable investments={investments || []} />
-          </Card>
-        </TabsContent>
+              <TabsContent value="users">
+                <Card className="mt-6 bg-white shadow-sm">
+                  <UserTable users={users || []} />
+                </Card>
+              </TabsContent>
 
-        <TabsContent value="withdrawals">
-          <WithdrawalSettings />
-        </TabsContent>
+              <TabsContent value="investments">
+                <Card className="mt-6 bg-white shadow-sm">
+                  <InvestmentTable investments={investments || []} />
+                </Card>
+              </TabsContent>
 
-        <TabsContent value="broadcast">
-          <BroadcastNotification />
-        </TabsContent>
-      </Tabs>
+              <TabsContent value="withdrawals">
+                <Card className="mt-6 bg-white shadow-sm">
+                  <WithdrawalSettings />
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="broadcast">
+                <Card className="mt-6 bg-white shadow-sm">
+                  <BroadcastNotification />
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
