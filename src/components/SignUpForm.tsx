@@ -11,6 +11,7 @@ const SignUpForm = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [referralCode, setReferralCode] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -36,7 +37,8 @@ const SignUpForm = () => {
       console.log("Attempting signup with data:", {
         email,
         username,
-        phone_number: formattedPhoneNumber
+        phone_number: formattedPhoneNumber,
+        referral_code: referralCode
       });
 
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
@@ -46,6 +48,7 @@ const SignUpForm = () => {
           data: {
             username: username,
             phone_number: formattedPhoneNumber,
+            referred_by: referralCode
           }
         }
       });
@@ -104,6 +107,14 @@ const SignUpForm = () => {
           onChange={(e) => setPhoneNumber(e.target.value)}
           required
           pattern="\d{10}"
+        />
+      </div>
+      <div>
+        <Input
+          type="text"
+          placeholder="Referral Code (Optional)"
+          value={referralCode}
+          onChange={(e) => setReferralCode(e.target.value)}
         />
       </div>
       <div>
