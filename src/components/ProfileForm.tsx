@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { UserRound, Mail, Edit2 } from "lucide-react";
+import { UserRound, Mail, Edit2, Link as LinkIcon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 const ProfileForm = () => {
@@ -32,7 +32,7 @@ const ProfileForm = () => {
 
       const { data, error } = await supabase
         .from('profiles')
-        .select('username')
+        .select('username, referral_code')
         .eq('id', userId)
         .single();
 
@@ -84,6 +84,17 @@ const ProfileForm = () => {
     }
   };
 
+  const handleCopyReferralLink = () => {
+    if (profile?.referral_code) {
+      const referralLink = `${window.location.origin}/${profile.referral_code}`;
+      navigator.clipboard.writeText(referralLink);
+      toast({
+        title: "Success",
+        description: "Referral link copied to clipboard",
+      });
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -128,6 +139,26 @@ const ProfileForm = () => {
           ) : (
             <p className="text-muted-foreground">{username || "Not set"}</p>
           )}
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <LinkIcon className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Referral Code</span>
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleCopyReferralLink}
+              disabled={!profile?.referral_code}
+            >
+              Copy Link
+            </Button>
+          </div>
+          <p className="text-muted-foreground">
+            {profile?.referral_code || "No referral code available"}
+          </p>
         </div>
       </CardContent>
     </Card>
