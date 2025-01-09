@@ -14,8 +14,9 @@ const WithdrawalSettings = () => {
   const queryClient = useQueryClient();
   const [newNetwork, setNewNetwork] = useState("");
   const [newMinAmount, setNewMinAmount] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: settings } = useQuery({
+  const { data: settings, isLoading, error } = useQuery({
     queryKey: ['withdrawal-settings'],
     queryFn: async () => {
       console.log('Fetching withdrawal settings...');
@@ -24,23 +25,31 @@ const WithdrawalSettings = () => {
         .select('*')
         .order('created_at', { ascending: true });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching withdrawal settings:', error);
+        throw error;
+      }
+      console.log('Fetched withdrawal settings:', data);
       return data;
     },
   });
 
   const addSettingMutation = useMutation({
     mutationFn: async () => {
+      setIsSubmitting(true);
+      console.log('Adding new withdrawal setting:', { network: newNetwork, minimum_amount: newMinAmount });
       const { error } = await supabase
         .from('withdrawal_settings')
         .insert({
           network: newNetwork,
           minimum_amount: parseFloat(newMinAmount),
+          is_active: true
         });
       
       if (error) throw error;
     },
     onSuccess: () => {
+      console.log('Successfully added withdrawal setting');
       queryClient.invalidateQueries({ queryKey: ['withdrawal-settings'] });
       setNewNetwork("");
       setNewMinAmount("");
@@ -49,17 +58,22 @@ const WithdrawalSettings = () => {
         description: "Withdrawal setting added successfully",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Error adding withdrawal setting:', error);
       toast({
         title: "Error",
         description: "Failed to add withdrawal setting",
         variant: "destructive",
       });
     },
+    onSettled: () => {
+      setIsSubmitting(false);
+    }
   });
 
   const toggleSettingMutation = useMutation({
     mutationFn: async ({ id, isActive }: { id: string, isActive: boolean }) => {
+      console.log('Toggling withdrawal setting:', { id, isActive });
       const { error } = await supabase
         .from('withdrawal_settings')
         .update({ is_active: isActive })
@@ -68,13 +82,15 @@ const WithdrawalSettings = () => {
       if (error) throw error;
     },
     onSuccess: () => {
+      console.log('Successfully updated withdrawal setting');
       queryClient.invalidateQueries({ queryKey: ['withdrawal-settings'] });
       toast({
         title: "Success",
         description: "Setting updated successfully",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Error updating withdrawal setting:', error);
       toast({
         title: "Error",
         description: "Failed to update setting",
@@ -93,8 +109,34 @@ const WithdrawalSettings = () => {
       });
       return;
     }
+
+    if (isNaN(parseFloat(newMinAmount)) || parseFloat(newMinAmount) < 0) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid minimum amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
     addSettingMutation.mutate();
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-6">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 text-center text-red-500">
+        Failed to load withdrawal settings. Please try again.
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -108,6 +150,7 @@ const WithdrawalSettings = () => {
                 value={newNetwork}
                 onChange={(e) => setNewNetwork(e.target.value)}
                 placeholder="e.g., MTN Mobile Money"
+                disabled={isSubmitting}
               />
             </div>
             <div>
@@ -118,11 +161,12 @@ const WithdrawalSettings = () => {
                 onChange={(e) => setNewMinAmount(e.target.value)}
                 placeholder="0.00"
                 step="0.01"
+                disabled={isSubmitting}
               />
             </div>
           </div>
-          <Button type="submit" disabled={addSettingMutation.isPending}>
-            {addSettingMutation.isPending ? (
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Adding...
@@ -148,7 +192,7 @@ const WithdrawalSettings = () => {
           <TableBody>
             {settings?.map((setting) => (
               <TableRow key={setting.id}>
-                <TableCell>{setting.network}</TableCell>
+                <TableCell className="font-medium">{setting.network}</TableCell>
                 <TableCell>₵{setting.minimum_amount.toFixed(2)}</TableCell>
                 <TableCell>{setting.is_active ? 'Active' : 'Inactive'}</TableCell>
                 <TableCell>
