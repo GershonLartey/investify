@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { UserRound, Mail, Edit2, Link as LinkIcon } from "lucide-react";
+import { UserRound, Mail, Edit2, Link as LinkIcon, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 const ProfileForm = () => {
@@ -24,7 +24,7 @@ const ProfileForm = () => {
     fetchUser();
   }, []);
 
-  const { data: profile } = useQuery({
+  const { data: profile, refetch: refetchProfile } = useQuery({
     queryKey: ['profile', userId],
     queryFn: async () => {
       console.log('Fetching profile data for user:', userId);
@@ -32,7 +32,7 @@ const ProfileForm = () => {
 
       const { data, error } = await supabase
         .from('profiles')
-        .select('username, referral_code')
+        .select('username, referral_code, referred_by')
         .eq('id', userId)
         .single();
 
@@ -79,6 +79,7 @@ const ProfileForm = () => {
         title: "Success",
         description: "Profile updated successfully",
       });
+      refetchProfile();
     } catch (error) {
       console.error('Error updating profile:', error);
     }
@@ -160,6 +161,16 @@ const ProfileForm = () => {
             {profile?.referral_code || "No referral code available"}
           </p>
         </div>
+
+        {profile?.referred_by && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Referred By</span>
+            </div>
+            <p className="text-muted-foreground">{profile.referred_by}</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
