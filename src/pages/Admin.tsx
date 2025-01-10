@@ -149,41 +149,43 @@ const Admin = () => {
             />
             
             <div className="mt-8 space-y-6">
-              <TabsContent value="overview" className="m-0">
-                <DashboardOverview
-                  transactions={transactions || []}
-                  users={users || []}
-                  investments={investments || []}
-                />
-              </TabsContent>
-
-              <TabsContent value="transactions" className="m-0">
-                <Card className="p-6">
-                  <TransactionList
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsContent value="overview" className="m-0">
+                  <DashboardOverview
                     transactions={transactions || []}
-                    onApprove={handleTransactionApproval}
-                    onReject={handleTransactionRejection}
+                    users={users || []}
+                    investments={investments || []}
                   />
-                </Card>
-              </TabsContent>
+                </TabsContent>
 
-              <TabsContent value="users" className="m-0">
-                <Card className="p-6">
-                  <UserTable users={users || []} />
-                </Card>
-              </TabsContent>
+                <TabsContent value="transactions" className="m-0">
+                  <Card className="p-6">
+                    <TransactionList
+                      transactions={transactions || []}
+                      onApprove={handleTransactionApproval}
+                      onReject={handleTransactionRejection}
+                    />
+                  </Card>
+                </TabsContent>
 
-              <TabsContent value="notifications" className="m-0">
-                <Card className="p-6">
-                  <BroadcastNotification />
-                </Card>
-              </TabsContent>
+                <TabsContent value="users" className="m-0">
+                  <Card className="p-6">
+                    <UserTable users={users || []} />
+                  </Card>
+                </TabsContent>
 
-              <TabsContent value="settings" className="m-0">
-                <Card className="p-6">
-                  <WithdrawalSettings />
-                </Card>
-              </TabsContent>
+                <TabsContent value="notifications" className="m-0">
+                  <Card className="p-6">
+                    <BroadcastNotification />
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="settings" className="m-0">
+                  <Card className="p-6">
+                    <WithdrawalSettings />
+                  </Card>
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
         </div>
