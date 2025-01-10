@@ -150,7 +150,15 @@ const Admin = () => {
             
             <div className="mt-8 space-y-6">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsContent value="overview" className="m-0">
+                <TabsList className="grid w-full grid-cols-5">
+                  {sidebarItems.map((item) => (
+                    <TabsTrigger key={item.id} value={item.id}>
+                      {item.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+
+                <TabsContent value="overview">
                   <DashboardOverview
                     transactions={transactions || []}
                     users={users || []}
@@ -158,7 +166,7 @@ const Admin = () => {
                   />
                 </TabsContent>
 
-                <TabsContent value="transactions" className="m-0">
+                <TabsContent value="transactions">
                   <Card className="p-6">
                     <TransactionList
                       transactions={transactions || []}
@@ -168,19 +176,19 @@ const Admin = () => {
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="users" className="m-0">
+                <TabsContent value="users">
                   <Card className="p-6">
                     <UserTable users={users || []} />
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="notifications" className="m-0">
+                <TabsContent value="notifications">
                   <Card className="p-6">
                     <BroadcastNotification />
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="settings" className="m-0">
+                <TabsContent value="settings">
                   <Card className="p-6">
                     <WithdrawalSettings />
                   </Card>
