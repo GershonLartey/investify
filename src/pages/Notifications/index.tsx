@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +9,34 @@ import NotificationItem from "./components/NotificationItem";
 
 const Notifications = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { data: notifications = [], isError } = useNotifications();
+
+  useEffect(() => {
+    const markNotificationsAsRead = async () => {
+      console.log('Marking notifications as read...');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('user_id', user.id)
+        .eq('read', false);
+
+      if (error) {
+        console.error('Error marking notifications as read:', error);
+        return;
+      }
+
+      // Invalidate both notifications and unread count queries
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['unread-notifications-count'] });
+      console.log('Notifications marked as read successfully');
+    };
+
+    markNotificationsAsRead();
+  }, []); // Run once when component mounts
 
   if (isError) {
     return (
