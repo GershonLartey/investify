@@ -248,7 +248,27 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      investment_analytics: {
+        Row: {
+          average_amount: number | null
+          date: string | null
+          total_amount: number | null
+          total_investments: number | null
+          unique_investors: number | null
+        }
+        Relationships: []
+      }
+      transaction_analytics: {
+        Row: {
+          average_amount: number | null
+          date: string | null
+          total_amount: number | null
+          total_transactions: number | null
+          type: string | null
+          unique_users: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       calculate_daily_investment_returns: {
@@ -262,6 +282,16 @@ export type Database = {
       generate_referral_code: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_referral_statistics: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          total_referrals: number
+          total_rewards: number
+          active_referrals: number
+        }[]
       }
       update_completed_investments: {
         Args: Record<PropertyKey, never>

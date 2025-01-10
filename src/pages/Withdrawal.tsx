@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 const Withdrawal = () => {
   const { toast } = useToast();
@@ -18,10 +19,63 @@ const Withdrawal = () => {
     amount: "",
   });
 
+  // Fetch withdrawal settings
+  const { data: withdrawalSettings } = useQuery({
+    queryKey: ['withdrawal-settings'],
+    queryFn: async () => {
+      console.log('Fetching withdrawal settings...');
+      const { data, error } = await supabase
+        .from('withdrawal_settings')
+        .select('*');
+      
+      if (error) {
+        console.error('Error fetching withdrawal settings:', error);
+        throw error;
+      }
+      console.log('Fetched withdrawal settings:', data);
+      return data;
+    },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
+      // Find selected network settings
+      const networkSettings = withdrawalSettings?.find(
+        setting => setting.network.toLowerCase() === formData.network.toLowerCase()
+      );
+
+      if (!networkSettings) {
+        toast({
+          title: "Network Error",
+          description: "Selected network is not available",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Check if network is disabled
+      if (!networkSettings.is_active) {
+        toast({
+          title: "Network Unavailable",
+          description: `We are currently not offering withdrawal services for ${networkSettings.network}`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Check minimum amount
+      const withdrawalAmount = parseFloat(formData.amount);
+      if (withdrawalAmount < networkSettings.minimum_amount) {
+        toast({
+          title: "Invalid Amount",
+          description: `Minimum withdrawal amount for ${networkSettings.network} is ₵${networkSettings.minimum_amount}`,
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
@@ -34,7 +88,6 @@ const Withdrawal = () => {
 
       if (profileError) throw profileError;
       
-      const withdrawalAmount = parseFloat(formData.amount);
       if (!profile || profile.balance < withdrawalAmount) {
         toast({
           title: "Insufficient Balance",
@@ -103,9 +156,11 @@ const Withdrawal = () => {
                 <SelectValue placeholder="Select network" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="mtn">MTN</SelectItem>
-                <SelectItem value="airteltigo">AirtelTigo</SelectItem>
-                <SelectItem value="telecel">Telecel</SelectItem>
+                {withdrawalSettings?.filter(setting => setting.is_active).map((setting) => (
+                  <SelectItem key={setting.id} value={setting.network.toLowerCase()}>
+                    {setting.network}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -135,6 +190,14 @@ const Withdrawal = () => {
               }
               required
             />
+            {formData.network && withdrawalSettings && (
+              <p className="text-sm text-gray-500 mt-1">
+                Minimum withdrawal: ₵
+                {withdrawalSettings.find(
+                  setting => setting.network.toLowerCase() === formData.network.toLowerCase()
+                )?.minimum_amount || 0}
+              </p>
+            )}
           </div>
 
           <Button type="submit" className="w-full">
