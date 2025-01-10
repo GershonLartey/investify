@@ -161,10 +161,14 @@ export type Database = {
         Row: {
           account_name: string | null
           amount: number
+          category: string | null
           created_at: string
           id: string
           network: string | null
+          notes: string | null
           phone_number: string | null
+          receipt_url: string | null
+          reference_id: string | null
           status: string
           transaction_id: string | null
           type: string
@@ -174,10 +178,14 @@ export type Database = {
         Insert: {
           account_name?: string | null
           amount: number
+          category?: string | null
           created_at?: string
           id?: string
           network?: string | null
+          notes?: string | null
           phone_number?: string | null
+          receipt_url?: string | null
+          reference_id?: string | null
           status?: string
           transaction_id?: string | null
           type: string
@@ -187,10 +195,14 @@ export type Database = {
         Update: {
           account_name?: string | null
           amount?: number
+          category?: string | null
           created_at?: string
           id?: string
           network?: string | null
+          notes?: string | null
           phone_number?: string | null
+          receipt_url?: string | null
+          reference_id?: string | null
           status?: string
           transaction_id?: string | null
           type?: string
