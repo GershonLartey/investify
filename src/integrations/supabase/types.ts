@@ -56,8 +56,10 @@ export type Database = {
       notifications: {
         Row: {
           created_at: string | null
+          dismissed_by: string[] | null
           id: string
           is_broadcast: boolean | null
+          is_persistent: boolean | null
           message: string
           read: boolean | null
           title: string
@@ -67,8 +69,10 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          dismissed_by?: string[] | null
           id?: string
           is_broadcast?: boolean | null
+          is_persistent?: boolean | null
           message: string
           read?: boolean | null
           title: string
@@ -78,8 +82,10 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          dismissed_by?: string[] | null
           id?: string
           is_broadcast?: boolean | null
+          is_persistent?: boolean | null
           message?: string
           read?: boolean | null
           title?: string

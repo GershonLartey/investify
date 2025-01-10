@@ -7,7 +7,18 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const WithdrawalSettings = () => {
   const { toast } = useToast();
@@ -94,6 +105,34 @@ const WithdrawalSettings = () => {
       toast({
         title: "Error",
         description: "Failed to update setting",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteSettingMutation = useMutation({
+    mutationFn: async (id: string) => {
+      console.log('Deleting withdrawal setting:', id);
+      const { error } = await supabase
+        .from('withdrawal_settings')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      console.log('Successfully deleted withdrawal setting');
+      queryClient.invalidateQueries({ queryKey: ['withdrawal-settings'] });
+      toast({
+        title: "Success",
+        description: "Setting deleted successfully",
+      });
+    },
+    onError: (error) => {
+      console.error('Error deleting withdrawal setting:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete setting",
         variant: "destructive",
       });
     },
@@ -195,13 +234,37 @@ const WithdrawalSettings = () => {
                 <TableCell className="font-medium">{setting.network}</TableCell>
                 <TableCell>₵{setting.minimum_amount.toFixed(2)}</TableCell>
                 <TableCell>{setting.is_active ? 'Active' : 'Inactive'}</TableCell>
-                <TableCell>
+                <TableCell className="space-x-2">
                   <Switch
                     checked={setting.is_active}
                     onCheckedChange={(checked) => 
                       toggleSettingMutation.mutate({ id: setting.id, isActive: checked })
                     }
                   />
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Network Setting</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete {setting.network}? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => deleteSettingMutation.mutate(setting.id)}
+                          className="bg-red-500 hover:bg-red-600"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </TableCell>
               </TableRow>
             ))}

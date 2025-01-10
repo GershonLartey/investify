@@ -2,18 +2,18 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useAdminData } from "@/pages/Admin/hooks/useAdminData";
+import { useAdminData } from "./Admin/hooks/useAdminData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader, Home, TrendingUp, User, Bell, Settings } from "lucide-react";
-import AdminHeader from "@/pages/Admin/components/AdminHeader";
-import TransactionList from "@/pages/Admin/components/TransactionList";
-import UserTable from "@/pages/Admin/components/UserTable";
-import InvestmentTable from "@/pages/Admin/components/InvestmentTable";
-import WithdrawalSettings from "@/pages/Admin/components/WithdrawalSettings";
-import BroadcastNotification from "@/pages/Admin/components/BroadcastNotification";
-import DashboardOverview from "@/pages/Admin/components/DashboardOverview";
+import AdminHeader from "./Admin/components/AdminHeader";
+import TransactionList from "./Admin/components/TransactionList";
+import UserTable from "./Admin/components/UserTable";
+import InvestmentTable from "./Admin/components/InvestmentTable";
+import WithdrawalSettings from "./Admin/components/WithdrawalSettings";
+import BroadcastNotification from "./Admin/components/BroadcastNotification";
+import DashboardOverview from "./Admin/components/DashboardOverview";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -129,75 +129,61 @@ const Admin = () => {
 
         {/* Main Content */}
         <div className="flex-1 ml-64">
-          <div className="p-8">
-            <div className="max-w-[1600px] mx-auto">
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-                <p className="text-gray-500 mt-2">
-                  Manage your platform's data and settings
-                </p>
-              </div>
+          <div className="p-8 max-w-[1920px] mx-auto">
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+              <p className="text-gray-500 mt-2">
+                Manage your platform's data and settings
+              </p>
+            </div>
 
-              <AdminHeader 
-                totalDeposits={transactions?.reduce((sum, t) => 
-                  t.type === 'deposit' && t.status === 'approved' ? sum + t.amount : sum, 0) || 0}
-                totalWithdrawals={transactions?.reduce((sum, t) => 
-                  t.type === 'withdrawal' && t.status === 'approved' ? sum + t.amount : sum, 0) || 0}
-                netBalance={transactions?.reduce((sum, t) => 
-                  t.status === 'approved' 
-                    ? (t.type === 'deposit' ? sum + t.amount : sum - t.amount)
-                    : sum, 0) || 0}
-              />
-              
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-                <TabsList className="grid w-full grid-cols-5 bg-white rounded-lg p-1">
-                  {sidebarItems.map((item) => (
-                    <TabsTrigger
-                      key={item.id}
-                      value={item.id}
-                      className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
-                    >
-                      {item.label}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
+            <AdminHeader 
+              totalDeposits={transactions?.reduce((sum, t) => 
+                t.type === 'deposit' && t.status === 'approved' ? sum + t.amount : sum, 0) || 0}
+              totalWithdrawals={transactions?.reduce((sum, t) => 
+                t.type === 'withdrawal' && t.status === 'approved' ? sum + t.amount : sum, 0) || 0}
+              netBalance={transactions?.reduce((sum, t) => 
+                t.status === 'approved' 
+                  ? (t.type === 'deposit' ? sum + t.amount : sum - t.amount)
+                  : sum, 0) || 0}
+            />
+            
+            <div className="mt-8 space-y-6">
+              <TabsContent value="overview" className="m-0">
+                <DashboardOverview
+                  transactions={transactions || []}
+                  users={users || []}
+                  investments={investments || []}
+                />
+              </TabsContent>
 
-                <TabsContent value="overview" className="mt-6">
-                  <DashboardOverview
+              <TabsContent value="transactions" className="m-0">
+                <Card className="p-6">
+                  <TransactionList
                     transactions={transactions || []}
-                    users={users || []}
-                    investments={investments || []}
+                    onApprove={handleTransactionApproval}
+                    onReject={handleTransactionRejection}
                   />
-                </TabsContent>
+                </Card>
+              </TabsContent>
 
-                <TabsContent value="transactions">
-                  <Card className="mt-6 bg-white shadow-sm">
-                    <TransactionList
-                      transactions={transactions || []}
-                      onApprove={handleTransactionApproval}
-                      onReject={handleTransactionRejection}
-                    />
-                  </Card>
-                </TabsContent>
+              <TabsContent value="users" className="m-0">
+                <Card className="p-6">
+                  <UserTable users={users || []} />
+                </Card>
+              </TabsContent>
 
-                <TabsContent value="users">
-                  <Card className="mt-6 bg-white shadow-sm">
-                    <UserTable users={users || []} />
-                  </Card>
-                </TabsContent>
+              <TabsContent value="notifications" className="m-0">
+                <Card className="p-6">
+                  <BroadcastNotification />
+                </Card>
+              </TabsContent>
 
-                <TabsContent value="notifications">
-                  <Card className="mt-6 bg-white shadow-sm">
-                    <BroadcastNotification />
-                  </Card>
-                </TabsContent>
-
-                <TabsContent value="settings">
-                  <Card className="mt-6 bg-white shadow-sm">
-                    <WithdrawalSettings />
-                  </Card>
-                </TabsContent>
-              </Tabs>
+              <TabsContent value="settings" className="m-0">
+                <Card className="p-6">
+                  <WithdrawalSettings />
+                </Card>
+              </TabsContent>
             </div>
           </div>
         </div>

@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 const BroadcastNotification = () => {
   const { toast } = useToast();
@@ -15,6 +16,7 @@ const BroadcastNotification = () => {
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [type, setType] = useState("info");
+  const [isPersistent, setIsPersistent] = useState(false);
 
   const broadcastMutation = useMutation({
     mutationFn: async () => {
@@ -37,7 +39,9 @@ const BroadcastNotification = () => {
         message,
         type,
         is_broadcast: true,
-        read: false
+        is_persistent: isPersistent,
+        read: false,
+        dismissed_by: []
       }));
 
       const { error } = await supabase
@@ -53,6 +57,7 @@ const BroadcastNotification = () => {
       setTitle("");
       setMessage("");
       setType("info");
+      setIsPersistent(false);
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast({
         title: "Success",
@@ -124,6 +129,17 @@ const BroadcastNotification = () => {
               <SelectItem value="error">Error</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="persistent"
+            checked={isPersistent}
+            onCheckedChange={setIsPersistent}
+          />
+          <label htmlFor="persistent" className="text-sm font-medium">
+            Make notification persistent (shows on every login until dismissed)
+          </label>
         </div>
 
         <Button 
