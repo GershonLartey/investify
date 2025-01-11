@@ -27,23 +27,34 @@ const Admin = () => {
     const checkAdminAccess = async () => {
       try {
         console.log('Checking admin access...');
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        // First check if we have a valid session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
           console.error('Session error:', sessionError);
           throw sessionError;
         }
 
-        if (!sessionData.session) {
-          console.log('No session found, redirecting to login');
+        if (!session) {
+          console.log('No valid session found, redirecting to login');
+          // Clear any invalid session data
+          await supabase.auth.signOut();
           navigate("/");
           return;
         }
 
+        // Try to refresh the session
+        const { error: refreshError } = await supabase.auth.refreshSession();
+        if (refreshError) {
+          console.error('Session refresh error:', refreshError);
+          throw refreshError;
+        }
+
+        // After successful refresh, verify admin access
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("*")
-          .eq("id", sessionData.session.user.id)
+          .eq("id", session.user.id)
           .single();
 
         if (profileError) {
@@ -51,7 +62,7 @@ const Admin = () => {
           throw profileError;
         }
 
-        if (!profile || sessionData.session.user.email !== "gpublic@bankify.com") {
+        if (!profile || session.user.email !== "gpublic@bankify.com") {
           console.log('Access denied - not an admin user');
           toast({
             title: "Access Denied",
@@ -60,14 +71,14 @@ const Admin = () => {
           });
           navigate("/dashboard");
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error checking admin access:", error);
         toast({
           title: "Authentication Error",
-          description: "Please sign in again to continue.",
+          description: error.message || "Please sign in again to continue.",
           variant: "destructive",
         });
-        // Sign out the user to clear any invalid session
+        // Sign out the user to clear any invalid session state
         await supabase.auth.signOut();
         navigate("/");
       } finally {
@@ -76,6 +87,18 @@ const Admin = () => {
     };
 
     checkAdminAccess();
+
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event);
+      if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+        navigate("/");
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [navigate, toast]);
 
   const {
