@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import SignUpForm from "@/components/SignUpForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 
 const Home = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const referralCode = searchParams.get('ref');
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -85,7 +87,7 @@ const Home = () => {
           </div>
 
           <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 animate-fade-in">
-            <Tabs defaultValue="login" className="space-y-6">
+            <Tabs defaultValue={referralCode ? "signup" : "login"} className="space-y-6">
               <TabsList className="grid w-full grid-cols-2 mb-4">
                 <TabsTrigger value="login">Login</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>

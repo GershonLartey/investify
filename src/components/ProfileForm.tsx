@@ -87,7 +87,8 @@ const ProfileForm = () => {
 
   const handleCopyReferralLink = () => {
     if (profile?.referral_code) {
-      const referralLink = `${window.location.origin}/${profile.referral_code}`;
+      // Generate the correct referral link format with ?ref=
+      const referralLink = `${window.location.origin}/?ref=${profile.referral_code}`;
       navigator.clipboard.writeText(referralLink);
       toast({
         title: "Success",
