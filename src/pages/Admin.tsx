@@ -189,9 +189,11 @@ const Admin = () => {
                 </TabsContent>
 
                 <TabsContent value="settings">
-                  <Card className="p-6">
+                  <div className="space-y-6">
+                    <SignupBonusSettings />
+                    <PaymentSettings />
                     <WithdrawalSettings />
-                  </Card>
+                  </div>
                 </TabsContent>
               </Tabs>
             </div>

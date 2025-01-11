@@ -103,6 +103,33 @@ export type Database = {
           },
         ]
       }
+      payment_settings: {
+        Row: {
+          account_name: string
+          account_number: string
+          created_at: string
+          id: string
+          network: string
+          updated_at: string
+        }
+        Insert: {
+          account_name: string
+          account_number: string
+          created_at?: string
+          id?: string
+          network: string
+          updated_at?: string
+        }
+        Update: {
+          account_name?: string
+          account_number?: string
+          created_at?: string
+          id?: string
+          network?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -112,6 +139,7 @@ export type Database = {
           phone_number: string | null
           referral_code: string | null
           referred_by: string | null
+          signup_bonus_balance: number | null
           updated_at: string
           username: string | null
         }
@@ -123,6 +151,7 @@ export type Database = {
           phone_number?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          signup_bonus_balance?: number | null
           updated_at?: string
           username?: string | null
         }
@@ -134,6 +163,7 @@ export type Database = {
           phone_number?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          signup_bonus_balance?: number | null
           updated_at?: string
           username?: string | null
         }
@@ -160,6 +190,27 @@ export type Database = {
           key?: string
           updated_at?: string
           value?: string
+        }
+        Relationships: []
+      }
+      signup_settings: {
+        Row: {
+          bonus_amount: number
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          bonus_amount?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          bonus_amount?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
         }
         Relationships: []
       }

@@ -7,6 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 const Deposit = () => {
   const { toast } = useToast();
@@ -17,6 +18,24 @@ const Deposit = () => {
     phoneNumber: "",
     transactionId: "",
     amount: "",
+  });
+
+  const { data: paymentSettings, isLoading } = useQuery({
+    queryKey: ['payment-settings'],
+    queryFn: async () => {
+      console.log('Fetching payment settings...');
+      const { data, error } = await supabase
+        .from('payment_settings')
+        .select('*')
+        .order('created_at', { ascending: true });
+      
+      if (error) {
+        console.error('Error fetching payment settings:', error);
+        throw error;
+      }
+      console.log('Fetched payment settings:', data);
+      return data;
+    },
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,14 +88,21 @@ const Deposit = () => {
       <h1 className="text-2xl font-bold text-gray-900">Make a Deposit</h1>
 
       <Card className="p-6 space-y-6">
-        <div className="bg-blue-50 p-4 rounded-lg space-y-2">
-          <p className="text-sm text-blue-800 font-medium">Payment Instructions</p>
-          <p className="text-sm text-blue-700">
-            Send the exact amount to the account below:
-          </p>
-          <p className="text-sm text-blue-900 font-medium">05xxxxxxxx</p>
-          <p className="text-sm text-blue-900 font-medium">John Doe</p>
-        </div>
+        {paymentSettings && paymentSettings.length > 0 && (
+          <div className="bg-blue-50 p-4 rounded-lg space-y-2">
+            <p className="text-sm text-blue-800 font-medium">Payment Instructions</p>
+            <p className="text-sm text-blue-700">
+              Send the exact amount to any of the accounts below:
+            </p>
+            {paymentSettings.map((setting) => (
+              <div key={setting.id} className="space-y-1">
+                <p className="text-sm text-blue-900 font-medium">{setting.network}</p>
+                <p className="text-sm text-blue-900 font-medium">{setting.account_number}</p>
+                <p className="text-sm text-blue-900 font-medium">{setting.account_name}</p>
+              </div>
+            ))}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
