@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, TrendingUp, User, Bell } from "lucide-react";
+import { Home, TrendingUp, User, Bell, Wallet } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -55,6 +55,16 @@ const Navigation = () => {
           >
             <TrendingUp className="h-5 w-5" />
             <span className="text-xs">Invest</span>
+          </Link>
+
+          <Link
+            to="/transactions"
+            className={`flex flex-col items-center p-1 ${
+              isActive("/transactions") ? "text-primary" : "text-gray-500"
+            }`}
+          >
+            <Wallet className="h-5 w-5" />
+            <span className="text-xs">Transactions</span>
           </Link>
 
           <Link

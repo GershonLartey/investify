@@ -50,77 +50,79 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary/5 to-primary/10">
       {/* Hero Section */}
-      <div className="container mx-auto px-4 py-12 lg:py-24">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-8 animate-fade-in">
-            <div className="inline-flex items-center px-4 py-2 bg-secondary/10 rounded-full text-secondary text-sm font-medium">
-              <span>New: Enhanced Investment Options</span>
-              <ChevronRight className="w-4 h-4 ml-2" />
-            </div>
-            
-            <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
-              Smart Investments, <br />
-              <span className="text-primary bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Better Future
-              </span>
-            </h1>
-            
-            <p className="text-lg text-gray-600 max-w-xl leading-relaxed">
-              Join thousands of successful investors on our secure and high-yield investment platform. Start your journey to financial freedom today.
-            </p>
-            
-            <div className="flex gap-6 items-center">
-              <div className="flex -space-x-4">
-                {[...Array(4)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="w-12 h-12 rounded-full bg-white shadow-lg border-2 border-white flex items-center justify-center text-sm font-medium text-primary ring-2 ring-primary/10 hover:scale-105 transition-transform"
-                  >
-                    {i + 1}K
-                  </div>
-                ))}
+      <div className="w-full px-4 py-12 lg:py-24">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8 animate-fade-in">
+              <div className="inline-flex items-center px-4 py-2 bg-secondary/10 rounded-full text-secondary text-sm font-medium">
+                <span>New: Enhanced Investment Options</span>
+                <ChevronRight className="w-4 h-4 ml-2" />
               </div>
-              <p className="text-sm text-gray-600">
-                Trusted by over <span className="font-semibold">10,000+</span> investors worldwide
+              
+              <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                Smart Investments, <br />
+                <span className="text-primary bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  Better Future
+                </span>
+              </h1>
+              
+              <p className="text-lg text-gray-600 max-w-xl leading-relaxed">
+                Join thousands of successful investors on our secure and high-yield investment platform. Start your journey to financial freedom today.
               </p>
+              
+              <div className="flex gap-6 items-center">
+                <div className="flex -space-x-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="w-12 h-12 rounded-full bg-white shadow-lg border-2 border-white flex items-center justify-center text-sm font-medium text-primary ring-2 ring-primary/10 hover:scale-105 transition-transform"
+                    >
+                      {i + 1}K
+                    </div>
+                  ))}
+                </div>
+                <p className="text-sm text-gray-600">
+                  Trusted by over <span className="font-semibold">10,000+</span> investors worldwide
+                </p>
+              </div>
             </div>
-          </div>
 
-          <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 animate-fade-in">
-            <Tabs defaultValue={referralCode ? "signup" : "login"} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
-              </TabsList>
-              <TabsContent value="login" className="mt-0">
-                <Auth
-                  supabaseClient={supabase}
-                  appearance={{ 
-                    theme: ThemeSupa,
-                    variables: {
-                      default: {
-                        colors: {
-                          brand: '#0F4C3A',
-                          brandAccent: '#86DC3D',
+            <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 animate-fade-in">
+              <Tabs defaultValue={referralCode ? "signup" : "login"} className="space-y-6">
+                <TabsList className="grid w-full grid-cols-2 mb-4">
+                  <TabsTrigger value="login">Login</TabsTrigger>
+                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                </TabsList>
+                <TabsContent value="login" className="mt-0">
+                  <Auth
+                    supabaseClient={supabase}
+                    appearance={{ 
+                      theme: ThemeSupa,
+                      variables: {
+                        default: {
+                          colors: {
+                            brand: '#0F4C3A',
+                            brandAccent: '#86DC3D',
+                          },
                         },
                       },
-                    },
-                  }}
-                  providers={[]}
-                  view="sign_in"
-                />
-              </TabsContent>
-              <TabsContent value="signup" className="mt-0">
-                <SignUpForm />
-              </TabsContent>
-            </Tabs>
+                    }}
+                    providers={[]}
+                    view="sign_in"
+                  />
+                </TabsContent>
+                <TabsContent value="signup" className="mt-0">
+                  <SignUpForm />
+                </TabsContent>
+              </Tabs>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Features Section */}
-      <div className="bg-white py-24">
-        <div className="container mx-auto px-4">
+      <div className="bg-white py-24 w-full">
+        <div className="max-w-[1400px] mx-auto px-4">
           <div className="text-center mb-16 animate-fade-in">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               Why Choose Our Platform
@@ -149,8 +151,8 @@ const Home = () => {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-primary text-white py-24">
-        <div className="container mx-auto px-4 text-center">
+      <div className="bg-primary text-white py-24 w-full">
+        <div className="max-w-[1400px] mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto space-y-8 animate-fade-in">
             <h2 className="text-4xl font-bold mb-6">
               Ready to Start Your Investment Journey?

@@ -44,14 +44,14 @@ const SignUpForm = () => {
       // Format phone number to ensure consistency
       const formattedPhoneNumber = phoneNumber.replace(/\D/g, '');
 
-      // If referral code provided, verify it exists
+      // If referral code provided, verify it exists (case-insensitive)
       if (referralCode) {
         console.log("Verifying referral code:", referralCode);
         const { data: referrerData, error: referrerError } = await supabase
           .from('profiles')
           .select('id')
-          .ilike('referral_code', referralCode)  // Using case-insensitive comparison
-          .single();
+          .ilike('referral_code', referralCode)
+          .maybeSingle(); // Using maybeSingle instead of single to handle no results
 
         if (referrerError || !referrerData) {
           console.error("Invalid referral code:", referrerError);
@@ -86,6 +86,22 @@ const SignUpForm = () => {
 
       if (signUpData.user) {
         console.log("Signup successful:", signUpData);
+        
+        // Create welcome notification
+        const { error: notificationError } = await supabase
+          .from('notifications')
+          .insert({
+            user_id: signUpData.user.id,
+            title: 'Welcome to Our Platform!',
+            message: 'Thank you for joining us. Start your investment journey today!',
+            type: 'welcome',
+            is_persistent: true
+          });
+
+        if (notificationError) {
+          console.error("Error creating welcome notification:", notificationError);
+        }
+
         toast({
           title: "Success",
           description: "Account created successfully! Please verify your email.",
