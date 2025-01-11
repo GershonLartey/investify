@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,16 @@ const SignUpForm = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+
+  // Get referral code from URL parameters
+  useEffect(() => {
+    const code = searchParams.get('ref');
+    if (code) {
+      console.log('Referral code found in URL:', code);
+      setReferralCode(code.toUpperCase());
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +50,7 @@ const SignUpForm = () => {
         const { data: referrerData, error: referrerError } = await supabase
           .from('profiles')
           .select('id')
-          .eq('referral_code', referralCode)
+          .ilike('referral_code', referralCode)  // Using case-insensitive comparison
           .single();
 
         if (referrerError || !referrerData) {
@@ -54,7 +64,7 @@ const SignUpForm = () => {
         email,
         username,
         phone_number: formattedPhoneNumber,
-        referred_by: referralCode
+        referred_by: referralCode.toUpperCase() // Ensure consistent case storage
       });
 
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
@@ -64,7 +74,7 @@ const SignUpForm = () => {
           data: {
             username: username,
             phone_number: formattedPhoneNumber,
-            referred_by: referralCode // This will be used by the handle_new_user trigger
+            referred_by: referralCode.toUpperCase() // Ensure consistent case storage
           }
         }
       });
@@ -130,7 +140,7 @@ const SignUpForm = () => {
           type="text"
           placeholder="Referral Code (Optional)"
           value={referralCode}
-          onChange={(e) => setReferralCode(e.target.value)}
+          onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
         />
       </div>
       <div>
