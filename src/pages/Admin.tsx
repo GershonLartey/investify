@@ -26,21 +26,33 @@ const Admin = () => {
   useEffect(() => {
     const checkAdminAccess = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        console.log('Checking admin access...');
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
         
-        if (!user) {
+        if (sessionError) {
+          console.error('Session error:', sessionError);
+          throw sessionError;
+        }
+
+        if (!sessionData.session) {
+          console.log('No session found, redirecting to login');
           navigate("/");
           return;
         }
 
-        const { data: profile, error } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("*")
-          .eq("id", user.id)
+          .eq("id", sessionData.session.user.id)
           .single();
 
-        if (error || !profile || user.email !== "gpublic@bankify.com") {
-          console.error("Admin access error:", error);
+        if (profileError) {
+          console.error('Profile fetch error:', profileError);
+          throw profileError;
+        }
+
+        if (!profile || sessionData.session.user.email !== "gpublic@bankify.com") {
+          console.log('Access denied - not an admin user');
           toast({
             title: "Access Denied",
             description: "You don't have permission to access this page.",
@@ -50,7 +62,14 @@ const Admin = () => {
         }
       } catch (error) {
         console.error("Error checking admin access:", error);
-        navigate("/dashboard");
+        toast({
+          title: "Authentication Error",
+          description: "Please sign in again to continue.",
+          variant: "destructive",
+        });
+        // Sign out the user to clear any invalid session
+        await supabase.auth.signOut();
+        navigate("/");
       } finally {
         setIsLoading(false);
       }
