@@ -14,6 +14,8 @@ import InvestmentTable from "./Admin/components/InvestmentTable";
 import WithdrawalSettings from "./Admin/components/WithdrawalSettings";
 import BroadcastNotification from "./Admin/components/BroadcastNotification";
 import DashboardOverview from "./Admin/components/DashboardOverview";
+import SignupBonusSettings from "./Admin/components/SignupBonusSettings";
+import PaymentSettings from "./Admin/components/PaymentSettings";
 
 const Admin = () => {
   const navigate = useNavigate();
