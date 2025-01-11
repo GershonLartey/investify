@@ -1,55 +1,45 @@
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import ProfileForm from "@/components/ProfileForm";
 
 const Profile = () => {
-  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
   const { toast } = useToast();
 
-  const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      navigate('/');
-      toast({
-        title: "Success",
-        description: "You have been signed out successfully",
-      });
-    } catch (error) {
-      console.error('Error signing out:', error);
-      toast({
-        title: "Error",
-        description: "Failed to sign out",
-        variant: "destructive",
-      });
-    }
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+
+    fetchUser();
+  }, []);
+
+  const handleCopyReferralLink = () => {
+    const baseUrl = window.location.origin;
+    const referralLink = `${baseUrl}/?ref=${user?.referral_code}`;
+    navigator.clipboard.writeText(referralLink);
+    toast({
+      title: "Success",
+      description: "Referral link copied to clipboard!",
+    });
   };
 
   return (
-    <div className="space-y-6">
+    <div>
       <h1 className="text-2xl font-bold">Profile</h1>
-      
-      <div className="grid gap-6">
-        <ProfileForm />
-
-        <div className="flex gap-4">
-          <Button 
-            variant="outline" 
-            className="flex-1"
-            onClick={() => navigate('/transactions')}
-          >
-            View Transaction History
-          </Button>
-          <Button 
-            variant="destructive" 
-            className="flex-1"
-            onClick={handleSignOut}
-          >
-            Sign Out
-          </Button>
+      {user ? (
+        <div>
+          <p>Email: {user.email}</p>
+          <p>Username: {user.user_metadata.username}</p>
+          <p>Referral Code: {user.user_metadata.referral_code}</p>
+          <button onClick={handleCopyReferralLink} className="mt-4 bg-blue-500 text-white p-2 rounded">
+            Copy Referral Link
+          </button>
         </div>
-      </div>
+      ) : (
+        <p>Loading...</p>
+      )}
     </div>
   );
 };

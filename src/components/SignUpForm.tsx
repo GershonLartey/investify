@@ -49,49 +49,75 @@ const SignUpForm = () => {
         console.log("Verifying referral code:", referralCode);
         const { data: referrerData, error: referrerError } = await supabase
           .from('profiles')
-          .select('id')
-          .ilike('referral_code', referralCode)  // Using case-insensitive comparison
+          .select('id, referral_code')
+          .ilike('referral_code', referralCode)
           .single();
+
+        console.log("Referral verification response:", { referrerData, referrerError });
 
         if (referrerError || !referrerData) {
           console.error("Invalid referral code:", referrerError);
           throw new Error("Invalid referral code");
         }
-        console.log("Referral code verified:", referrerData);
-      }
 
-      console.log("Attempting signup with data:", {
-        email,
-        username,
-        phone_number: formattedPhoneNumber,
-        referred_by: referralCode.toUpperCase() // Ensure consistent case storage
-      });
+        // Use the exact case from the database
+        const validReferralCode = referrerData.referral_code;
+        console.log("Valid referral code found:", validReferralCode);
 
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            username: username,
-            phone_number: formattedPhoneNumber,
-            referred_by: referralCode.toUpperCase() // Ensure consistent case storage
+        // Proceed with signup using the correct case
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              username: username,
+              phone_number: formattedPhoneNumber,
+              referred_by: validReferralCode
+            }
           }
-        }
-      });
-
-      if (signUpError) {
-        console.error("Signup error:", signUpError);
-        throw signUpError;
-      }
-
-      if (signUpData.user) {
-        console.log("Signup successful:", signUpData);
-        toast({
-          title: "Success",
-          description: "Account created successfully! Please verify your email.",
         });
-        
-        navigate("/dashboard");
+
+        if (signUpError) {
+          console.error("Signup error:", signUpError);
+          throw signUpError;
+        }
+
+        if (signUpData.user) {
+          console.log("Signup successful:", signUpData);
+          toast({
+            title: "Success",
+            description: "Account created successfully! Please verify your email.",
+          });
+          
+          navigate("/dashboard");
+        }
+      } else {
+        // Proceed with signup without referral code
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              username: username,
+              phone_number: formattedPhoneNumber
+            }
+          }
+        });
+
+        if (signUpError) {
+          console.error("Signup error:", signUpError);
+          throw signUpError;
+        }
+
+        if (signUpData.user) {
+          console.log("Signup successful:", signUpData);
+          toast({
+            title: "Success",
+            description: "Account created successfully! Please verify your email.",
+          });
+          
+          navigate("/dashboard");
+        }
       }
     } catch (error: any) {
       console.error('Signup error:', error);
