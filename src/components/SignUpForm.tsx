@@ -22,7 +22,7 @@ const SignUpForm = () => {
     const code = searchParams.get('ref');
     if (code) {
       console.log('Referral code found in URL:', code);
-      setReferralCode(code.toUpperCase());
+      setReferralCode(code);
     }
   }, [searchParams]);
 
@@ -44,27 +44,35 @@ const SignUpForm = () => {
       // Format phone number to ensure consistency
       const formattedPhoneNumber = phoneNumber.replace(/\D/g, '');
 
-      // If referral code provided, verify it exists (case-insensitive)
+      // If referral code provided, verify it exists
+      let referrerId = null;
       if (referralCode) {
         console.log("Verifying referral code:", referralCode);
         const { data: referrerData, error: referrerError } = await supabase
           .from('profiles')
           .select('id')
-          .ilike('referral_code', referralCode)
-          .maybeSingle(); // Using maybeSingle instead of single to handle no results
+          .eq('referral_code', referralCode)
+          .single();
 
-        if (referrerError || !referrerData) {
-          console.error("Invalid referral code:", referrerError);
+        if (referrerError) {
+          console.error("Error verifying referral code:", referrerError);
           throw new Error("Invalid referral code");
         }
-        console.log("Referral code verified:", referrerData);
+
+        if (!referrerData) {
+          console.error("No referrer found for code:", referralCode);
+          throw new Error("Invalid referral code");
+        }
+
+        referrerId = referrerData.id;
+        console.log("Referral code verified, referrer ID:", referrerId);
       }
 
       console.log("Attempting signup with data:", {
         email,
         username,
         phone_number: formattedPhoneNumber,
-        referred_by: referralCode.toUpperCase() // Ensure consistent case storage
+        referred_by: referralCode
       });
 
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
@@ -74,7 +82,7 @@ const SignUpForm = () => {
           data: {
             username: username,
             phone_number: formattedPhoneNumber,
-            referred_by: referralCode.toUpperCase() // Ensure consistent case storage
+            referred_by: referralCode // Store original case
           }
         }
       });
@@ -97,7 +105,7 @@ const SignUpForm = () => {
           console.error("Error fetching welcome message:", settingsError);
         }
 
-        // Create welcome notification with custom message if available
+        // Create welcome notification
         const { error: notificationError } = await supabase
           .from('notifications')
           .insert({
@@ -166,7 +174,7 @@ const SignUpForm = () => {
           type="text"
           placeholder="Referral Code (Optional)"
           value={referralCode}
-          onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+          onChange={(e) => setReferralCode(e.target.value)}
         />
       </div>
       <div>
