@@ -51,7 +51,7 @@ const Home = () => {
     <div className="min-h-screen bg-gradient-to-b from-primary/5 to-primary/10">
       {/* Hero Section */}
       <div className="w-full px-4 py-12 lg:py-24">
-        <div className="max-w-[1400px] mx-auto">
+        <div className="container mx-auto max-w-[1920px]">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8 animate-fade-in">
               <div className="inline-flex items-center px-4 py-2 bg-secondary/10 rounded-full text-secondary text-sm font-medium">
@@ -122,7 +122,7 @@ const Home = () => {
 
       {/* Features Section */}
       <div className="bg-white py-24 w-full">
-        <div className="max-w-[1400px] mx-auto px-4">
+        <div className="container mx-auto max-w-[1920px] px-4">
           <div className="text-center mb-16 animate-fade-in">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               Why Choose Our Platform
@@ -152,7 +152,7 @@ const Home = () => {
 
       {/* CTA Section */}
       <div className="bg-primary text-white py-24 w-full">
-        <div className="max-w-[1400px] mx-auto px-4 text-center">
+        <div className="container mx-auto max-w-[1920px] px-4 text-center">
           <div className="max-w-3xl mx-auto space-y-8 animate-fade-in">
             <h2 className="text-4xl font-bold mb-6">
               Ready to Start Your Investment Journey?
