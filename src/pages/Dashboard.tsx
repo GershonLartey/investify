@@ -109,6 +109,40 @@ const Dashboard = () => {
     retry: 1,
   });
 
+  // Add new query for total returns
+  const { data: totalReturns } = useQuery({
+    queryKey: ['total-returns', session?.user?.id],
+    queryFn: async () => {
+      console.log('Calculating total returns...');
+      if (!session?.user?.id) return 0;
+
+      // Get completed investments
+      const { data: completedInvestments, error: investmentsError } = await supabase
+        .from('investments')
+        .select('amount, daily_interest, start_date, end_date')
+        .eq('user_id', session.user.id)
+        .eq('status', 'completed');
+
+      if (investmentsError) {
+        console.error('Error fetching completed investments:', investmentsError);
+        throw investmentsError;
+      }
+
+      // Calculate total returns from completed investments
+      const returns = completedInvestments?.reduce((total, investment) => {
+        const startDate = new Date(investment.start_date);
+        const endDate = new Date(investment.end_date);
+        const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+        const dailyReturn = (investment.amount * (investment.daily_interest / 100));
+        return total + (dailyReturn * days);
+      }, 0) || 0;
+
+      console.log('Total returns calculated:', returns);
+      return returns;
+    },
+    enabled: !!session?.user?.id && !isLoading,
+  });
+
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
@@ -137,7 +171,9 @@ const Dashboard = () => {
         </Card>
         <Card className="p-6">
           <h3 className="text-sm font-medium text-gray-500">Total Returns</h3>
-          <p className="text-2xl font-bold text-gray-900">₵0.00</p>
+          <p className="text-2xl font-bold text-gray-900">
+            ₵{totalReturns?.toFixed(2) || '0.00'}
+          </p>
         </Card>
       </div>
 

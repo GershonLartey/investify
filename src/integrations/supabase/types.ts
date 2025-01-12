@@ -197,18 +197,24 @@ export type Database = {
         Row: {
           bonus_amount: number
           created_at: string
+          default_welcome_message: string
+          default_welcome_title: string
           id: string
           updated_at: string
         }
         Insert: {
           bonus_amount?: number
           created_at?: string
+          default_welcome_message?: string
+          default_welcome_title?: string
           id?: string
           updated_at?: string
         }
         Update: {
           bonus_amount?: number
           created_at?: string
+          default_welcome_message?: string
+          default_welcome_title?: string
           id?: string
           updated_at?: string
         }

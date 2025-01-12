@@ -87,13 +87,23 @@ const SignUpForm = () => {
       if (signUpData.user) {
         console.log("Signup successful:", signUpData);
         
-        // Create welcome notification
+        // Get welcome message from settings
+        const { data: settings, error: settingsError } = await supabase
+          .from('signup_settings')
+          .select('default_welcome_title, default_welcome_message')
+          .single();
+
+        if (settingsError) {
+          console.error("Error fetching welcome message:", settingsError);
+        }
+
+        // Create welcome notification with custom message if available
         const { error: notificationError } = await supabase
           .from('notifications')
           .insert({
             user_id: signUpData.user.id,
-            title: 'Welcome to Our Platform!',
-            message: 'Thank you for joining us. Start your investment journey today!',
+            title: settings?.default_welcome_title || 'Welcome to Our Platform!',
+            message: settings?.default_welcome_message || 'Thank you for joining us. Start your investment journey today!',
             type: 'welcome',
             is_persistent: true
           });
