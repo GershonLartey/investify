@@ -18,7 +18,14 @@ import Notifications from "./pages/Notifications";
 import Admin from "./pages/Admin";
 import TransactionHistory from "./pages/TransactionHistory";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      retryDelay: 1000,
+    },
+  },
+});
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<any>(null);
@@ -26,33 +33,46 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check current session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
-        console.error("Error getting session:", error);
+    // Check active session on mount
+    const checkSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error("Session error:", error);
+          throw error;
+        }
+        setSession(session);
+      } catch (error: any) {
+        console.error("Auth error:", error);
         toast({
-          title: "Session Error",
+          title: "Authentication Error",
           description: "Please log in again",
           variant: "destructive",
         });
+      } finally {
+        setLoading(false);
       }
-      setSession(session);
-      setLoading(false);
-    });
+    };
 
-    // Set up real-time subscription to auth changes
+    checkSession();
+
+    // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.log("Auth state changed:", _event);
-      if (_event === 'TOKEN_REFRESHED') {
-        console.log('Token refreshed successfully');
-      }
-      if (_event === 'SIGNED_OUT') {
-        // Clear any cached data
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event);
+      
+      if (event === 'SIGNED_OUT') {
+        console.log('User signed out, clearing cache...');
         queryClient.clear();
+        setSession(null);
+      } else if (event === 'SIGNED_IN') {
+        console.log('User signed in, updating session...');
+        setSession(session);
+      } else if (event === 'TOKEN_REFRESHED') {
+        console.log('Token refreshed successfully');
+        setSession(session);
       }
-      setSession(session);
     });
 
     return () => {
@@ -76,22 +96,27 @@ const App = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
-        console.error("Error getting session:", error);
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        setSession(session);
+      } catch (error: any) {
+        console.error("Auth initialization error:", error);
         toast({
-          title: "Session Error",
-          description: "Please log in again",
+          title: "Error",
+          description: "Failed to initialize authentication",
           variant: "destructive",
         });
       }
-      setSession(session);
-    });
+    };
+
+    initializeAuth();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("Auth state changed in App:", _event);
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed in App:", event);
       setSession(session);
     });
 
