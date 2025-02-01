@@ -1,53 +1,52 @@
-// Update the SQL function to only calculate returns for active investments
-CREATE OR REPLACE FUNCTION public.calculate_daily_investment_returns()
-RETURNS void
-LANGUAGE plpgsql
-AS $function$
-BEGIN
-    -- Update user balances based on active investments only
-    UPDATE profiles p
-    SET balance = balance + (
-        SELECT COALESCE(SUM(amount * (daily_interest / 100)), 0)
-        FROM investments i
-        WHERE i.user_id = p.id
-        AND i.status = 'active'
-        AND i.end_date > NOW() -- Only include investments that haven't matured
+import { serve } from "https://deno.fresh.dev/std@v1/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    // Create Supabase client
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    -- Insert notification for users with active investments
-    INSERT INTO notifications (user_id, title, message, type)
-    SELECT DISTINCT
-        i.user_id,
-        'Daily Investment Return',
-        'Your investment has generated returns for today',
-        'investment'
-    FROM investments i
-    WHERE i.status = 'active'
-    AND i.end_date > NOW(); -- Only notify for active investments that haven't matured
-END;
-$function$;
+    // Call the SQL function to calculate daily returns
+    const { data, error } = await supabaseClient.rpc('calculate_daily_investment_returns');
+    
+    if (error) {
+      console.error('Error calculating daily returns:', error);
+      throw error;
+    }
 
--- Update the check_and_update_investments function to handle matured investments
-CREATE OR REPLACE FUNCTION public.update_completed_investments()
-RETURNS void
-LANGUAGE plpgsql
-AS $function$
-BEGIN
-    -- Update status of matured investments
-    UPDATE investments
-    SET status = 'completed'
-    WHERE status = 'active' 
-    AND end_date <= NOW();
+    // Also update completed investments
+    const { data: updateData, error: updateError } = await supabaseClient.rpc('update_completed_investments');
+    
+    if (updateError) {
+      console.error('Error updating completed investments:', updateError);
+      throw updateError;
+    }
 
-    -- Send notification to users whose investments have matured
-    INSERT INTO notifications (user_id, title, message, type)
-    SELECT 
-        i.user_id,
-        'Investment Matured',
-        'Your investment plan has completed. You can now reinvest or withdraw your funds.',
-        'investment_completed'
-    FROM investments i
-    WHERE i.status = 'completed'
-    AND i.end_date::date = CURRENT_DATE;
-END;
-$function$;
+    return new Response(
+      JSON.stringify({ message: 'Daily returns calculated successfully' }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Error in calculate-daily-returns function:', error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { 
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
+  }
+});
