@@ -34,71 +34,75 @@ const Navigation = () => {
   });
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="flex justify-between py-2 space-x-2">
-          <Link
-            to="/dashboard"
-            className={`flex flex-col items-center p-1 ${
-              isActive("/dashboard") ? "text-primary" : "text-gray-500"
-            }`}
-          >
-            <Home className="h-5 w-5" />
-            <span className="text-xs">Home</span>
-          </Link>
+    <>
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
+        <div className="max-w-4xl mx-auto px-2">
+          <div className="flex justify-start py-2 gap-4">
+            <Link
+              to="/dashboard"
+              className={`flex flex-col items-center p-1 ${
+                isActive("/dashboard") ? "text-primary" : "text-gray-500"
+              }`}
+            >
+              <Home className="h-5 w-5" />
+              <span className="text-xs">Home</span>
+            </Link>
 
-          <Link
-            to="/investments"
-            className={`flex flex-col items-center p-1 ${
-              isActive("/investments") ? "text-primary" : "text-gray-500"
-            }`}
-          >
-            <TrendingUp className="h-5 w-5" />
-            <span className="text-xs">Invest</span>
-          </Link>
+            <Link
+              to="/investments"
+              className={`flex flex-col items-center p-1 ${
+                isActive("/investments") ? "text-primary" : "text-gray-500"
+              }`}
+            >
+              <TrendingUp className="h-5 w-5" />
+              <span className="text-xs">Invest</span>
+            </Link>
 
-          <Link
-            to="/transactions"
-            className={`flex flex-col items-center p-1 ${
-              isActive("/transactions") ? "text-primary" : "text-gray-500"
-            }`}
-          >
-            <Wallet className="h-5 w-5" />
-            <span className="text-xs">Transactions</span>
-          </Link>
+            <Link
+              to="/transactions"
+              className={`flex flex-col items-center p-1 ${
+                isActive("/transactions") ? "text-primary" : "text-gray-500"
+              }`}
+            >
+              <Wallet className="h-5 w-5" />
+              <span className="text-xs">Transactions</span>
+            </Link>
 
-          <Link
-            to="/notifications"
-            className={`flex flex-col items-center p-1 relative ${
-              isActive("/notifications") ? "text-primary" : "text-gray-500"
-            }`}
-          >
-            <div className="relative">
-              <Bell className="h-5 w-5" />
-              {unreadCount > 0 && (
-                <Badge 
-                  className="absolute -top-2 -right-2 h-4 w-4 p-0 flex items-center justify-center text-[10px] bg-red-500"
-                  variant="destructive"
-                >
-                  {unreadCount > 99 ? '99+' : unreadCount}
-                </Badge>
-              )}
-            </div>
-            <span className="text-xs">Alerts</span>
-          </Link>
+            <Link
+              to="/notifications"
+              className={`flex flex-col items-center p-1 relative ${
+                isActive("/notifications") ? "text-primary" : "text-gray-500"
+              }`}
+            >
+              <div className="relative">
+                <Bell className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <Badge 
+                    className="absolute -top-2 -right-2 h-4 w-4 p-0 flex items-center justify-center text-[10px] bg-red-500"
+                    variant="destructive"
+                  >
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </Badge>
+                )}
+              </div>
+              <span className="text-xs">Alerts</span>
+            </Link>
 
-          <Link
-            to="/profile"
-            className={`flex flex-col items-center p-1 ${
-              isActive("/profile") ? "text-primary" : "text-gray-500"
-            }`}
-          >
-            <User className="h-5 w-5" />
-            <span className="text-xs">Profile</span>
-          </Link>
+            <Link
+              to="/profile"
+              className={`flex flex-col items-center p-1 ${
+                isActive("/profile") ? "text-primary" : "text-gray-500"
+              }`}
+            >
+              <User className="h-5 w-5" />
+              <span className="text-xs">Profile</span>
+            </Link>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+      {/* Add padding to prevent content from being hidden behind the navbar */}
+      <div className="pb-24" />
+    </>
   );
 };
 
