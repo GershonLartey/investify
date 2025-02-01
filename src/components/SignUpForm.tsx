@@ -82,7 +82,7 @@ const SignUpForm = () => {
           data: {
             username: username,
             phone_number: formattedPhoneNumber,
-            referred_by: referralCode // Store original case
+            referred_by: referralCode
           }
         }
       });
@@ -103,6 +103,11 @@ const SignUpForm = () => {
 
         if (settingsError) {
           console.error("Error fetching welcome message:", settingsError);
+          // Use fallback welcome message if settings fetch fails
+          settings = {
+            default_welcome_title: 'Welcome to Our Platform!',
+            default_welcome_message: 'Thank you for joining us. Start your investment journey today!'
+          };
         }
 
         // Create welcome notification
@@ -110,8 +115,8 @@ const SignUpForm = () => {
           .from('notifications')
           .insert({
             user_id: signUpData.user.id,
-            title: settings?.default_welcome_title || 'Welcome to Our Platform!',
-            message: settings?.default_welcome_message || 'Thank you for joining us. Start your investment journey today!',
+            title: settings.default_welcome_title,
+            message: settings.default_welcome_message,
             type: 'welcome',
             is_persistent: true
           });
