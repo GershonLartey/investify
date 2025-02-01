@@ -1,4 +1,4 @@
-import { serve } from "https://deno.fresh.dev/std@v1/http/server.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
@@ -13,6 +13,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting daily returns calculation...');
+    
     // Create Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -27,13 +29,7 @@ serve(async (req) => {
       throw error;
     }
 
-    // Also update completed investments
-    const { data: updateData, error: updateError } = await supabaseClient.rpc('update_completed_investments');
-    
-    if (updateError) {
-      console.error('Error updating completed investments:', updateError);
-      throw updateError;
-    }
+    console.log('Daily returns calculated successfully');
 
     return new Response(
       JSON.stringify({ message: 'Daily returns calculated successfully' }),
