@@ -1,4 +1,3 @@
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Activity } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -146,16 +145,6 @@ const Investments = () => {
           Check Active Investments
         </Button>
       </div>
-
-      <Card>
-        <h3 className="text-lg font-semibold mb-2">Expected Returns</h3>
-        <p className="text-2xl font-bold">
-          ₵{(userData?.investments?.reduce((sum, inv) => {
-            const daysRemaining = Math.ceil((new Date(inv.end_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-            return sum + (inv.amount * (inv.daily_interest / 100) * daysRemaining);
-          }, 0) || 0).toFixed(2)}
-        </p>
-      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {packages.map((pkg, index) => (
