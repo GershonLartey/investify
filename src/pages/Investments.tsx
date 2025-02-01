@@ -147,7 +147,7 @@ const Investments = () => {
         </Button>
       </div>
 
-      <Card className="p-4">
+      <Card>
         <h3 className="text-lg font-semibold mb-2">Expected Returns</h3>
         <p className="text-2xl font-bold">
           ₵{(userData?.investments?.reduce((sum, inv) => {
