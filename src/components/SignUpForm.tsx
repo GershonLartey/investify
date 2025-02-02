@@ -44,35 +44,11 @@ const SignUpForm = () => {
       // Format phone number to ensure consistency
       const formattedPhoneNumber = phoneNumber.replace(/\D/g, '');
 
-      // If referral code provided, verify it exists
-      let referrerId = null;
-      if (referralCode) {
-        console.log("Verifying referral code:", referralCode);
-        const { data: referrerData, error: referrerError } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('referral_code', referralCode)
-          .single();
-
-        if (referrerError) {
-          console.error("Error verifying referral code:", referrerError);
-          throw new Error("Invalid referral code");
-        }
-
-        if (!referrerData) {
-          console.error("No referrer found for code:", referralCode);
-          throw new Error("Invalid referral code");
-        }
-
-        referrerId = referrerData.id;
-        console.log("Referral code verified, referrer ID:", referrerId);
-      }
-
       console.log("Attempting signup with data:", {
         email,
         username,
         phone_number: formattedPhoneNumber,
-        referred_by: referralCode
+        referral_code: referralCode
       });
 
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
@@ -80,9 +56,9 @@ const SignUpForm = () => {
         password,
         options: {
           data: {
-            username: username,
+            username,
             phone_number: formattedPhoneNumber,
-            referred_by: referralCode
+            referral_code: referralCode || null
           }
         }
       });

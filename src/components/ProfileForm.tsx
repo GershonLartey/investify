@@ -35,9 +35,9 @@ const ProfileForm = () => {
         .from('referrals')
         .select('code')
         .eq('referrer_id', userId)
-        .single();
+        .maybeSingle();
 
-      if (referralError && referralError.code !== 'PGRST116') {
+      if (referralError) {
         console.error('Error fetching referral code:', referralError);
         throw referralError;
       }
@@ -56,11 +56,14 @@ const ProfileForm = () => {
       
       const { data: referral, error: referralError } = await supabase
         .from('referrals')
-        .select('referrer_id, profiles:referrer_id(username)')
+        .select(`
+          referrer_id,
+          referrer:profiles!referrals_referrer_id_fkey(username)
+        `)
         .eq('referred_id', userId)
-        .single();
+        .maybeSingle();
 
-      if (referralError && referralError.code !== 'PGRST116') {
+      if (referralError) {
         console.error('Error fetching referrer:', referralError);
         throw referralError;
       }
@@ -208,13 +211,13 @@ const ProfileForm = () => {
           </p>
         </div>
 
-        {referredByData?.profiles?.username && (
+        {referredByData?.referrer?.username && (
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-medium">Referred By</span>
             </div>
-            <p className="text-muted-foreground">{referredByData.profiles.username}</p>
+            <p className="text-muted-foreground">{referredByData.referrer.username}</p>
           </div>
         )}
       </CardContent>
