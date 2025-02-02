@@ -24,6 +24,52 @@ const ProfileForm = () => {
     fetchUser();
   }, []);
 
+  // Query for user's referral code
+  const { data: referralData } = useQuery({
+    queryKey: ['referral', userId],
+    queryFn: async () => {
+      if (!userId) return null;
+      console.log('Fetching referral data for user:', userId);
+      
+      const { data: referralCode, error: referralError } = await supabase
+        .from('referrals')
+        .select('code')
+        .eq('referrer_id', userId)
+        .single();
+
+      if (referralError && referralError.code !== 'PGRST116') {
+        console.error('Error fetching referral code:', referralError);
+        throw referralError;
+      }
+
+      return referralCode;
+    },
+    enabled: !!userId
+  });
+
+  // Query for referred by information
+  const { data: referredByData } = useQuery({
+    queryKey: ['referred-by', userId],
+    queryFn: async () => {
+      if (!userId) return null;
+      console.log('Fetching referrer data for user:', userId);
+      
+      const { data: referral, error: referralError } = await supabase
+        .from('referrals')
+        .select('referrer_id, profiles:referrer_id(username)')
+        .eq('referred_id', userId)
+        .single();
+
+      if (referralError && referralError.code !== 'PGRST116') {
+        console.error('Error fetching referrer:', referralError);
+        throw referralError;
+      }
+
+      return referral;
+    },
+    enabled: !!userId
+  });
+
   const { data: profile, refetch: refetchProfile } = useQuery({
     queryKey: ['profile', userId],
     queryFn: async () => {
@@ -32,7 +78,7 @@ const ProfileForm = () => {
 
       const { data, error } = await supabase
         .from('profiles')
-        .select('username, referral_code, referred_by')
+        .select('username')
         .eq('id', userId)
         .single();
 
@@ -86,9 +132,8 @@ const ProfileForm = () => {
   };
 
   const handleCopyReferralLink = () => {
-    if (profile?.referral_code) {
-      // Generate the correct referral link format with ?ref=
-      const referralLink = `${window.location.origin}/?ref=${profile.referral_code}`;
+    if (referralData?.code) {
+      const referralLink = `${window.location.origin}/?ref=${referralData.code}`;
       navigator.clipboard.writeText(referralLink);
       toast({
         title: "Success",
@@ -153,23 +198,23 @@ const ProfileForm = () => {
               variant="secondary"
               size="sm"
               onClick={handleCopyReferralLink}
-              disabled={!profile?.referral_code}
+              disabled={!referralData?.code}
             >
               Copy Link
             </Button>
           </div>
           <p className="text-muted-foreground">
-            {profile?.referral_code || "No referral code available"}
+            {referralData?.code || "No referral code available"}
           </p>
         </div>
 
-        {profile?.referred_by && (
+        {referredByData?.profiles?.username && (
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-medium">Referred By</span>
             </div>
-            <p className="text-muted-foreground">{profile.referred_by}</p>
+            <p className="text-muted-foreground">{referredByData.profiles.username}</p>
           </div>
         )}
       </CardContent>

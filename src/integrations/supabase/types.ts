@@ -137,8 +137,6 @@ export type Database = {
           created_at: string
           id: string
           phone_number: string | null
-          referral_code: string | null
-          referred_by: string | null
           signup_bonus_balance: number | null
           updated_at: string
           username: string | null
@@ -149,8 +147,6 @@ export type Database = {
           created_at?: string
           id: string
           phone_number?: string | null
-          referral_code?: string | null
-          referred_by?: string | null
           signup_bonus_balance?: number | null
           updated_at?: string
           username?: string | null
@@ -161,13 +157,59 @@ export type Database = {
           created_at?: string
           id?: string
           phone_number?: string | null
-          referral_code?: string | null
-          referred_by?: string | null
           signup_bonus_balance?: number | null
           updated_at?: string
           username?: string | null
         }
         Relationships: []
+      }
+      referrals: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          referred_id: string
+          referrer_id: string
+          reward_amount: number | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          referred_id: string
+          referrer_id: string
+          reward_amount?: number | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          referred_id?: string
+          referrer_id?: string
+          reward_amount?: number | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referred_id_fkey"
+            columns: ["referred_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       settings: {
         Row: {
@@ -342,19 +384,9 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
-      generate_referral_code: {
+      generate_unique_referral_code: {
         Args: Record<PropertyKey, never>
         Returns: string
-      }
-      get_referral_statistics: {
-        Args: {
-          user_id: string
-        }
-        Returns: {
-          total_referrals: number
-          total_rewards: number
-          active_referrals: number
-        }[]
       }
       update_completed_investments: {
         Args: Record<PropertyKey, never>
