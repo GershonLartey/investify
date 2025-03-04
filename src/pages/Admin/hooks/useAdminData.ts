@@ -1,3 +1,4 @@
+
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -92,19 +93,32 @@ export const useAdminData = (isLoading: boolean) => {
   const handleTransactionApproval = async (transaction: Transaction) => {
     try {
       console.log('Approving transaction:', transaction.id);
+      
+      // Update transaction status to approved
       const { error } = await supabase
         .from('transactions')
         .update({ status: 'approved' })
         .eq('id', transaction.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating transaction status:', error);
+        throw error;
+      }
 
-      console.log('Transaction approved successfully:', transaction.id);
+      console.log('Transaction approved successfully. Transaction ID:', transaction.id);
+      console.log('User ID:', transaction.user_id);
+      console.log('Amount:', transaction.amount);
+      console.log('Type:', transaction.type);
+      
+      // The user balance will be updated by the database trigger 'handle_transaction_approval'
+      // We don't need to manually update the balance here
+
       toast({
         title: "Success",
-        description: "Transaction approved successfully",
+        description: "Transaction approved successfully. User balance updated.",
       });
 
+      // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['admin-transactions'] });
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
     } catch (error) {
